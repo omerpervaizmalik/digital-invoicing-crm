@@ -1,63 +1,152 @@
-import Image from "next/image";
+import { ShieldCheck, TrendingUp, Users, Package, Receipt, ArrowRight, Activity, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { getCurrentTenant, getClients, getItems, getInvoices } from './actions';
 
-export default function Home() {
+export default async function Dashboard() {
+  const tenant = await getCurrentTenant();
+  const clients = tenant ? await getClients(tenant.id) : [];
+  const items = tenant ? await getItems(tenant.id) : [];
+  const invoices = tenant ? await getInvoices(tenant.id) : [];
+  
+  const businessName = tenant?.businessName || 'Get Legal Solution';
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-emerald-500 selection:text-white">
+      {/* Navbar */}
+      <nav className="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-neutral-950" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">{businessName} <span className="text-emerald-500">DI</span></span>
+          </div>
+          <div className="flex items-center gap-6 text-sm font-medium text-neutral-400">
+            <Link href="/" className="text-white">Dashboard</Link>
+            <Link href="/clients" className="hover:text-emerald-400 transition-colors">Clients</Link>
+            <Link href="/items" className="hover:text-emerald-400 transition-colors">Items</Link>
+            <Link href="/vouchers" className="hover:text-emerald-400 transition-colors">Vouchers</Link>
+            <Link href="/support" className="hover:text-emerald-400 transition-colors">Settings</Link>
+            <div className="h-8 w-8 rounded-full bg-neutral-800 border border-neutral-700 ml-4"></div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        <header className="flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2">{businessName} Invoice Management System</h1>
+            <p className="text-neutral-400">Monitor your real-time FBR digital invoicing metrics and system health.</p>
+          </div>
+        </header>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+          <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 transition-colors group">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-neutral-400">Registered Buyers</h3>
+              <Users className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-mono font-bold">{clients.length}</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 transition-colors group">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-neutral-400">Item Catalog</h3>
+              <Package className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-mono font-bold">{items.length}</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 transition-colors group">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-neutral-400">Total Invoices</h3>
+              <Receipt className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-mono font-bold">{invoices.length}</p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 transition-colors group">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-neutral-400">Success Rate</h3>
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-mono font-bold">100%</p>
+          </div>
+        </div>
+
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Col - Activity */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold tracking-tight">Recent FBR Transmissions</h2>
+                <button className="text-sm font-medium text-emerald-500 hover:text-emerald-400 flex items-center">
+                  View All <ChevronRight className="w-4 h-4 ml-1" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {[
+                  { id: "INV-2026-004", client: "TechCorp Ltd", status: "VALID", time: "2 mins ago" },
+                  { id: "INV-2026-003", client: "Alpha Logistics", status: "VALID", time: "45 mins ago" },
+                  { id: "INV-2026-002", client: "Beta Manufacturing", status: "PENDING", time: "1 hour ago" },
+                  { id: "INV-2026-001", client: "Omega Traders", status: "FAILED_CONNECTION", time: "2 hours ago" },
+                ].map((inv, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-neutral-950 border border-neutral-800/50 hover:bg-neutral-800/30 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-lg bg-neutral-800 flex items-center justify-center border border-neutral-700">
+                        <FileText className="w-5 h-5 text-neutral-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{inv.id}</p>
+                        <p className="text-sm text-neutral-400">{inv.client}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide ${
+                        inv.status === 'VALID' ? 'bg-emerald-500/10 text-emerald-500' :
+                        inv.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500' :
+                        'bg-rose-500/10 text-rose-500'
+                      }`}>
+                        {inv.status}
+                      </span>
+                      <span className="text-sm text-neutral-500 w-24 text-right">{inv.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Col - Quick Actions */}
+          <div className="space-y-6">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-900/40 to-neutral-900 border border-emerald-900/50">
+              <h2 className="text-xl font-bold tracking-tight mb-2">Sandbox Automator</h2>
+              <p className="text-sm text-neutral-400 mb-6">Run standard scenario arrays against the PRAL test gateway to extract production tokens.</p>
+              <button className="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold transition-all transform active:scale-[0.98]">
+                Execute Test Scenarios
+              </button>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800">
+              <h2 className="text-xl font-bold tracking-tight mb-4">Failover Queue</h2>
+              <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 flex items-start gap-4 mb-4">
+                <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-rose-500 mb-1">1 Offline Invoice</h3>
+                  <p className="text-sm text-rose-200/70">Connection dropped during FBR payload transmission. Awaiting manual retry.</p>
+                </div>
+              </div>
+              <button className="w-full py-3 px-4 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-white font-semibold transition-all">
+                Review & Resubmit
+              </button>
+            </div>
+          </div>
+          
         </div>
       </main>
     </div>

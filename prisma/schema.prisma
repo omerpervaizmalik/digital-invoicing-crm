@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Represents the businesses using this SaaS CRM
+model Tenant {
+  id                    String      @id @default(cuid())
+  businessName          String
+  ntnCnic               String      @unique // 7 or 13 digits
+  province              String
+  address               String
+  businessNature        String?
+  sector                String?
+  
+  // PRAL Integration
+  fbrToken              String?     // 5-year token
+  fbrTokenExpiry        DateTime?
+  
+  clients               Client[]
+  items                 Item[]
+  invoices              Invoice[]
+  
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+// Represents the buyers/customers of a Tenant
+model Client {
+  id                    String      @id @default(cuid())
+  tenantId              String
+  tenant                Tenant      @relation(fields: [tenantId], references: [id])
+  
+  buyerBusinessName     String
+  buyerNTNCNIC          String?     // Optional for unregistered
+  buyerProvince         String
+  buyerAddress          String
+  buyerRegistrationType String      // "Registered" | "Unregistered"
+  
+  invoices              Invoice[]
+  
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+// Pre-configured Items for Vouchers/Invoicing
+model Item {
+  id                    String      @id @default(cuid())
+  tenantId              String
+  tenant                Tenant      @relation(fields: [tenantId], references: [id])
+  
+  hsCode                String      // e.g. "0101.2100"
+  productDescription    String
+  rate                  String      // e.g. "18%"
+  uoM                   String      // e.g. "Numbers, pieces, units"
+  fixedNotifiedValueOrRetailPrice Float @default(0)
+  
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+// The core Invoice (Matches FBR JSON structure requirements)
+model Invoice {
+  id                    String      @id @default(cuid())
+  tenantId              String
+  tenant                Tenant      @relation(fields: [tenantId], references: [id])
+  clientId              String
+  client                Client      @relation(fields: [clientId], references: [id])
+  
+  invoiceType           String      // "Sale Invoice" | "Debit Note"
+  invoiceDate           DateTime    // "YYYY-MM-DD"
+  invoiceRefNo          String?     // 22 or 28 chars, required for Debit Note
+  
+  // FBR Status Tracking
+  fbrInvoiceNumber      String?     // 22-to-28 digit FBR Invoice Number
+  status                String      @default("DRAFT") // "DRAFT" | "PENDING_FBR" | "VALID" | "INVALID" | "FAILED_CONNECTION"
+  validationError       String?     // E.g. Error code 0050, 0058
+  
+  items                 InvoiceItem[]
+  
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+// Line items for an Invoice
+model InvoiceItem {
+  id                    String      @id @default(cuid())
+  invoiceId             String
+  invoice               Invoice     @relation(fields: [invoiceId], references: [id])
+  
+  hsCode                String
+  productDescription    String
+  rate                  String
+  uoM                   String
+  quantity              Float
+  totalValues           Float
+  valueSalesExcludingST Float
+  fixedNotifiedValueOrRetailPrice Float
+  salesTaxApplicable    Float
+  salesTaxWithheldAtSource Float  @default(0)
+  extraTax              Float     @default(0)
+  furtherTax            Float     @default(0)
+  sroScheduleNo         String?
+  fedPayable            Float     @default(0)
+  discount              Float     @default(0)
+  saleType              String    @default("Goods at standard rate (default)")
+  sroItemSerialNo       String?
+}
