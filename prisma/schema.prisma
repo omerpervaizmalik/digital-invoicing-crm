@@ -17,23 +17,75 @@ model Tenant {
   businessNature        String?
   sector                String?
   
+  logoUrl               String?
+  phone                 String?
+  email                 String?
+  website               String?
+  
+  isProfileComplete     Boolean     @default(false)
+  
   // PRAL Integration
   fbrToken              String?     // 5-year token
   fbrTokenExpiry        DateTime?
   
   clients               Client[]
+  suppliers             Supplier[]
   items                 Item[]
+  invoices              Invoice[]
+  stockRegisters        StockRegister[]
+  
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  
+  users                 User[]
+  subscription          Subscription?
+  fbrIntegration        FbrIntegration?
+}
+
+// User Roles
+// ULTIMATE_ADMIN: System Owner
+// TENANT_ADMIN: Company Owner/Subscriber
+// SUPERVISOR: Can approve standard user vouchers
+// STANDARD_USER: Data entry only
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  name           String
+  role           String    @default("STANDARD_USER") // "ULTIMATE_ADMIN" | "TENANT_ADMIN" | "SUPERVISOR" | "STANDARD_USER"
+  
+  tenantId       String?
+  tenant         Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  createdInvoices Invoice[] @relation("Creator")
+  approvedInvoices Invoice[] @relation("Approver")
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// Represents the buyers/customers of a Tenant
+model Supplier {
+  id                    String      @id @default(cuid())
+  tenantId              String
+  tenant                Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  sellerBusinessName    String
+  sellerNTNCNIC         String?     // Optional for unregistered
+  sellerProvince        String
+  sellerAddress         String
+  sellerRegistrationType String     // "Registered" | "Unregistered"
+  
   invoices              Invoice[]
   
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
 }
 
-// Represents the buyers/customers of a Tenant
 model Client {
   id                    String      @id @default(cuid())
   tenantId              String
-  tenant                Tenant      @relation(fields: [tenantId], references: [id])
+  tenant                Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   buyerBusinessName     String
   buyerNTNCNIC          String?     // Optional for unregistered
@@ -51,34 +103,52 @@ model Client {
 model Item {
   id                    String      @id @default(cuid())
   tenantId              String
-  tenant                Tenant      @relation(fields: [tenantId], references: [id])
+  tenant                Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
+  itemCode              String      @default("")
   hsCode                String      // e.g. "0101.2100"
   productDescription    String
   rate                  String      // e.g. "18%"
   uoM                   String      // e.g. "Numbers, pieces, units"
+  unitPrice             Float       @default(0)
   fixedNotifiedValueOrRetailPrice Float @default(0)
+  
+  saleType              String      @default("Goods at standard rate (default)")
+  sroScheduleNo         String?
+  sroItemSerialNo       String?
+  petroleumLevyOn       String?
   
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
+
+  @@unique([tenantId, itemCode])
 }
 
 // The core Invoice (Matches FBR JSON structure requirements)
 model Invoice {
   id                    String      @id @default(cuid())
+  voucherNumber         Int         @default(0)
   tenantId              String
-  tenant                Tenant      @relation(fields: [tenantId], references: [id])
-  clientId              String
-  client                Client      @relation(fields: [clientId], references: [id])
+  tenant                Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientId              String?
+  client                Client?     @relation(fields: [clientId], references: [id])
+  supplierId            String?
+  supplier              Supplier?   @relation(fields: [supplierId], references: [id])
   
-  invoiceType           String      // "Sale Invoice" | "Debit Note"
+  invoiceType           String      // "Sale Invoice" | "Debit Note" | "Purchase Invoice" | "Credit Note"
   invoiceDate           DateTime    // "YYYY-MM-DD"
   invoiceRefNo          String?     // 22 or 28 chars, required for Debit Note
   
   // FBR Status Tracking
   fbrInvoiceNumber      String?     // 22-to-28 digit FBR Invoice Number
-  status                String      @default("DRAFT") // "DRAFT" | "PENDING_FBR" | "VALID" | "INVALID" | "FAILED_CONNECTION"
+  status                String      @default("DRAFT") // "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "PENDING_FBR" | "VALID" | "INVALID" | "FAILED_CONNECTION"
   validationError       String?     // E.g. Error code 0050, 0058
+  
+  creatorId             String?
+  creator               User?       @relation("Creator", fields: [creatorId], references: [id])
+  
+  approverId            String?
+  approver              User?       @relation("Approver", fields: [approverId], references: [id])
   
   items                 InvoiceItem[]
   
@@ -90,8 +160,9 @@ model Invoice {
 model InvoiceItem {
   id                    String      @id @default(cuid())
   invoiceId             String
-  invoice               Invoice     @relation(fields: [invoiceId], references: [id])
+  invoice               Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   
+  itemCode              String      @default("")
   hsCode                String
   productDescription    String
   rate                  String
@@ -109,4 +180,76 @@ model InvoiceItem {
   discount              Float     @default(0)
   saleType              String    @default("Goods at standard rate (default)")
   sroItemSerialNo       String?
+  petroleumLevyOn       String?   // "Direct Sale" | "Retail Sale"
+}
+
+model StockRegister {
+  id                  Int      @id @default(autoincrement())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itemCode            String   @default("")
+  hsCode              String
+  uoM                 String
+  salesTaxRate        Float
+  monthYear           String   // Format: YYYY-MM
+  
+  // Opening Balance
+  openingVal          Float    @default(0)
+  openingQty          Float    @default(0)
+  
+  // Inflow
+  purchasedVal        Float    @default(0)
+  purchasedQty        Float    @default(0)
+  
+  // Outflow
+  domesticTaxableVal  Float    @default(0)
+  domesticTaxableQty  Float    @default(0)
+  exemptVal           Float    @default(0)
+  exemptQty           Float    @default(0)
+  zeroRatedVal        Float    @default(0)
+  zeroRatedQty        Float    @default(0)
+  
+  // Closing Balance
+  closingVal          Float    @default(0)
+  closingQty          Float    @default(0)
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([tenantId, itemCode, monthYear])
+}
+
+// Subscription Management
+model Subscription {
+  id             String    @id @default(cuid())
+  tenantId       String    @unique
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  planTier       String    // "FREE", "PRO", "ENTERPRISE"
+  monthlyQuota   Int       // E.g., 50 for FREE, 500 for PRO
+  invoicesUsed   Int       @default(0) // Resets monthly
+  maxUsers       Int       @default(5)
+  
+  startDate      DateTime  @default(now())
+  endDate        DateTime? // If null, active until canceled
+  isActive       Boolean   @default(true)
+}
+
+// FBR Integration Center
+model FbrIntegration {
+  id             String    @id @default(cuid())
+  tenantId       String    @unique
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  posId          String
+  clientId       String
+  clientSecret   String
+  
+  environment    String    @default("SANDBOX") // "SANDBOX" or "PRODUCTION"
+  isActive       Boolean   @default(false)
+  isVisibleToTenant Boolean @default(false) // Controlled by Ultimate Admin
+  
+  lastSync       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

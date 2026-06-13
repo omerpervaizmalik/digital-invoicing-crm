@@ -10,24 +10,7 @@ export default async function ItemsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
-      <nav className="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-neutral-950" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">Get Legal Solution <span className="text-emerald-500">DI</span></span>
-          </div>
-          <div className="flex items-center gap-6 text-sm font-medium text-neutral-400">
-            <Link href="/" className="hover:text-emerald-400 transition-colors">Dashboard</Link>
-            <Link href="/clients" className="hover:text-emerald-400 transition-colors">Clients</Link>
-            <Link href="/items" className="text-white">Items</Link>
-            <Link href="/vouchers" className="hover:text-emerald-400 transition-colors">Vouchers</Link>
-            <Link href="/support" className="hover:text-emerald-400 transition-colors">Settings</Link>
-            <div className="h-8 w-8 rounded-full bg-neutral-800 border border-neutral-700 ml-4"></div>
-          </div>
-        </div>
-      </nav>
+      
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <header className="flex items-center justify-between mb-8">
@@ -61,6 +44,7 @@ export default async function ItemsPage() {
                   <th className="px-4 py-4 font-medium">HS Code</th>
                   <th className="px-4 py-4 font-medium">Sales Tax Rate</th>
                   <th className="px-4 py-4 font-medium">Unit of Measure (UOM)</th>
+                  <th className="px-4 py-4 font-medium">Current Stock</th>
                   <th className="px-4 py-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
@@ -80,11 +64,14 @@ export default async function ItemsPage() {
                     </td>
                     <td className="px-4 py-4 font-mono text-emerald-500 font-medium">{item.hsCode}</td>
                     <td className="px-4 py-4 text-neutral-300">
-                      <span className="px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-xs font-bold">{item.rate}</span>
+                      <span className="px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-xs font-bold">
+                        {item.rate.includes('%') ? item.rate : !isNaN(Number(item.rate)) ? `${Number(item.rate) * 100}%` : item.rate}
+                      </span>
                     </td>
                     <td className="px-4 py-4 text-neutral-400">{item.uoM}</td>
+                    <td className="px-4 py-4 text-emerald-400 font-bold font-mono">{item.currentStock}</td>
                     <td className="px-4 py-4 text-right">
-                      <button className="text-emerald-500 font-medium hover:underline">Edit</button>
+                      <Link href={`/items/${item.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
                     </td>
                   </tr>
                 ))}

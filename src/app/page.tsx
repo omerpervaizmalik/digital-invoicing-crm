@@ -1,8 +1,14 @@
 import { ShieldCheck, TrendingUp, Users, Package, Receipt, ArrowRight, Activity, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentTenant, getClients, getItems, getInvoices } from './actions';
+import { getCurrentTenant, getClients, getItems, getInvoices, getCurrentUser } from './actions';
+import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
+  const user = await getCurrentUser();
+  if (user?.role === 'ULTIMATE_ADMIN') {
+    redirect('/admin');
+  }
+
   const tenant = await getCurrentTenant();
   const clients = tenant ? await getClients(tenant.id) : [];
   const items = tenant ? await getItems(tenant.id) : [];
@@ -13,24 +19,7 @@ export default async function Dashboard() {
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-emerald-500 selection:text-white">
       {/* Navbar */}
-      <nav className="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-neutral-950" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">{businessName} <span className="text-emerald-500">DI</span></span>
-          </div>
-          <div className="flex items-center gap-6 text-sm font-medium text-neutral-400">
-            <Link href="/" className="text-white">Dashboard</Link>
-            <Link href="/clients" className="hover:text-emerald-400 transition-colors">Clients</Link>
-            <Link href="/items" className="hover:text-emerald-400 transition-colors">Items</Link>
-            <Link href="/vouchers" className="hover:text-emerald-400 transition-colors">Vouchers</Link>
-            <Link href="/support" className="hover:text-emerald-400 transition-colors">Settings</Link>
-            <div className="h-8 w-8 rounded-full bg-neutral-800 border border-neutral-700 ml-4"></div>
-          </div>
-        </div>
-      </nav>
+      
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12">
@@ -90,6 +79,19 @@ export default async function Dashboard() {
               </div>
               
               <div className="space-y-4">
+                <Link href="/stock-register" className="flex items-center justify-between p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-500">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-emerald-500">FBR Stock Register</h3>
+                      <p className="text-sm text-neutral-400">View real-time inventory compliance.</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-emerald-500 group-hover:translate-x-1 transition-transform" />
+                </Link>
+
                 {[
                   { id: "INV-2026-004", client: "TechCorp Ltd", status: "VALID", time: "2 mins ago" },
                   { id: "INV-2026-003", client: "Alpha Logistics", status: "VALID", time: "45 mins ago" },
