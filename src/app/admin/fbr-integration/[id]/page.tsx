@@ -67,6 +67,11 @@ export default async function FbrIntegrationDetail({ params }: { params: { id: s
                 <input type="text" name="posId" defaultValue={integration?.posId || ''} required className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-2 px-3 text-sm focus:border-emerald-500 outline-none font-mono" />
               </div>
               <div>
+                <label className="block text-xs font-bold text-emerald-500 uppercase mb-1">PRAL Security Token (Bearer)</label>
+                <input type="password" name="fbrToken" defaultValue={t.fbrToken || ''} placeholder="e.g. 90e4e727-d927-3a9b..." required className="w-full bg-neutral-950 border border-emerald-500/50 rounded-lg py-2 px-3 text-sm focus:border-emerald-500 outline-none font-mono" />
+                <p className="text-xs text-neutral-500 mt-1">The 5-year static token generated in IRIS.</p>
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-neutral-500 uppercase mb-1">Client ID</label>
                 <input type="text" name="clientId" defaultValue={integration?.clientId || ''} required className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-2 px-3 text-sm focus:border-emerald-500 outline-none font-mono" />
               </div>
