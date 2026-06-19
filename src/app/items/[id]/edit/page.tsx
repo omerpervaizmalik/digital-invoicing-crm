@@ -18,9 +18,9 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
   const monthYear = new Date().toISOString().slice(0, 7);
   const stockRecord = await prisma.stockRegister.findUnique({
     where: {
-      tenantId_hsCode_monthYear: {
+      tenantId_itemCode_monthYear: {
         tenantId: item.tenantId,
-        hsCode: item.hsCode,
+        itemCode: item.itemCode,
         monthYear
       }
     }
