@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { createSession } from '../../lib/session';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 export async function updateTenantProfile(formData: FormData) {
   const tenant = await getCurrentTenant();
@@ -26,14 +27,30 @@ export async function updateTenantProfile(formData: FormData) {
   let logoUrl = tenant.logoUrl;
 
   if (logoFile && logoFile.size > 0) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
+    );
     const buffer = Buffer.from(await logoFile.arrayBuffer());
     const fileName = `${tenant.id}-${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'logos');
     
-    // Ensure dir exists
-    await fs.mkdir(uploadDir, { recursive: true });
-    await fs.writeFile(path.join(uploadDir, fileName), buffer);
-    logoUrl = `/uploads/logos/${fileName}`;
+    const { data, error } = await supabase.storage
+      .from('tenant-logos')
+      .upload(fileName, buffer, {
+        contentType: logoFile.type || 'image/png',
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Supabase Upload Error:', error);
+      throw new Error('Failed to upload logo to Cloud Storage.');
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('tenant-logos')
+      .getPublicUrl(fileName);
+      
+    logoUrl = publicUrlData.publicUrl;
   }
 
   await prisma.tenant.update({

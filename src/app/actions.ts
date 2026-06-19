@@ -23,7 +23,7 @@ export async function getCurrentTenant() {
   }
   
   const tenant = await prisma.tenant.findUnique({
-    where: { id: session.tenantId }
+    where: { id: session.tenantId as string }
   });
   
   return tenant;
