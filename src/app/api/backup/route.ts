@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       suppliers: true,
       items: true,
       invoices: {
-        include: { items: true, paymentReceipts: true }
+        include: { items: true }
       },
       stockRegisters: true,
       fbrIntegration: true,
