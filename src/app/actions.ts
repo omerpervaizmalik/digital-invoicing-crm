@@ -33,7 +33,7 @@ export async function getCurrentTenant() {
 export async function getCurrentUser() {
   const session = await getSession();
   if (!session || !session.userId) return null;
-  return await prisma.user.findUnique({ where: { id: session.userId } });
+  return await prisma.user.findUnique({ where: { id: session.userId as string } });
 }
 
 // CLIENT ACTIONS
