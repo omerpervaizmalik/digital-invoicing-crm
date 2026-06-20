@@ -28,7 +28,7 @@ export default async function Dashboard() {
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-xl overflow-hidden relative shadow-lg shadow-emerald-500/20 bg-neutral-900 border border-neutral-800 shrink-0 hidden md:block">
-              <img src="/logo.jpeg" alt="Get Legal Solution Logo" className="w-full h-full object-cover" />
+              <img src="/logo.png" alt="Get Legal Solution Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">{businessName} Invoice Management</h1>

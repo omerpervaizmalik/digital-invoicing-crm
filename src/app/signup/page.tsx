@@ -9,7 +9,7 @@ export default function SignupPage() {
       <div className="max-w-2xl w-full bg-neutral-900 border border-neutral-800 p-6 md:p-8 rounded-2xl shadow-xl">
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="h-20 w-20 rounded-2xl overflow-hidden relative mb-6 shadow-lg shadow-emerald-500/20 bg-neutral-950">
-            <img src="/logo.jpeg" alt="Get Legal Solution Logo" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Get Legal Solution Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Create an Account</h1>
           <p className="text-neutral-400">Register your company for Get Legal Solution DI</p>
