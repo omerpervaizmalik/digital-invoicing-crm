@@ -33,7 +33,7 @@ export default function GlobalNav({ businessName, role }: { businessName: string
         {/* Logo and Brand */}
         <Link href="/" className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg overflow-hidden flex items-center justify-center relative bg-emerald-500/10">
-            <Image src="/logo.jpeg" alt="Get Legal Solution" fill className="object-cover" />
+            <img src="/logo.jpeg" alt="Get Legal Solution" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-lg tracking-tight text-white hidden sm:block">
             {businessName} <span className="text-emerald-500">DI</span>
