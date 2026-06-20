@@ -26,7 +26,9 @@ export default async function AdminDashboard() {
         <header className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight mb-2 flex items-center gap-3">
-              <ShieldCheck className="w-8 h-8 text-emerald-500" />
+              <div className="h-12 w-12 rounded-xl overflow-hidden relative shadow-lg shadow-emerald-500/20 bg-neutral-950 shrink-0">
+                <img src="/logo.png" alt="Get Legal Solution Logo" className="w-full h-full object-cover" />
+              </div>
               Ultimate Admin Dashboard
             </h1>
             <p className="text-neutral-400">System-wide overview of all companies, users, and API usage.</p>
