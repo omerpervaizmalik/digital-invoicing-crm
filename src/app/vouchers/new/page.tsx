@@ -15,7 +15,7 @@ export default async function NewVoucherPage() {
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <Link href="/vouchers" className="inline-flex items-center text-sm font-medium text-emerald-500 hover:text-emerald-400 mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Vouchers
         </Link>

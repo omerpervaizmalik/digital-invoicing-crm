@@ -13,7 +13,7 @@ export default async function SettingsProfilePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
         
         {!tenant.isProfileComplete && (
           <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-4">

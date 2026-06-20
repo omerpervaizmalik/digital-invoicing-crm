@@ -12,7 +12,7 @@ export default async function NewSupplierPage() {
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <Link href="/suppliers" className="inline-flex items-center gap-2 text-neutral-400 hover:text-emerald-400 transition-colors mb-8 font-medium">
           <ArrowLeft className="w-4 h-4" /> Back to Suppliers
         </Link>

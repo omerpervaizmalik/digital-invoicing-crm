@@ -35,7 +35,7 @@ export default async function StockRegisterPage({
     <div className="min-h-screen bg-neutral-950 text-white font-sans flex flex-col">
       
 
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-6 py-12 flex flex-col">
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col">
         <div className="flex justify-between items-end mb-8">
           <div>
             <h1 className="text-3xl font-black mb-2">FBR Stock Register</h1>
@@ -112,7 +112,7 @@ export default async function StockRegisterPage({
               <tbody className="divide-y divide-neutral-800">
                 {stockData.length === 0 ? (
                   <tr>
-                    <td colSpan={18} className="px-6 py-12 text-center text-neutral-500">
+                    <td colSpan={18} className="px-4 md:px-6 py-8 md:py-12 text-center text-neutral-500">
                       No stock data recorded for {currentMonth}. Creates invoices or purchases to populate the register.
                     </td>
                   </tr>

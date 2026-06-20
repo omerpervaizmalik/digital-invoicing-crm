@@ -1,18 +1,22 @@
 import React from 'react';
 import { signup } from '../actions/auth';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-6 font-sans text-white">
-      <div className="max-w-2xl w-full bg-neutral-900 border border-neutral-800 p-8 rounded-2xl shadow-xl">
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 md:p-6 font-sans text-white">
+      <div className="max-w-2xl w-full bg-neutral-900 border border-neutral-800 p-6 md:p-8 rounded-2xl shadow-xl">
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="h-20 w-20 rounded-2xl overflow-hidden relative mb-6 shadow-lg shadow-emerald-500/20 bg-neutral-950">
+            <Image src="/logo.jpeg" alt="Get Legal Solution Logo" fill className="object-cover" />
+          </div>
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Create an Account</h1>
           <p className="text-neutral-400">Register your company for Get Legal Solution DI</p>
         </div>
         
         <form action={signup} className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <h3 className="font-bold text-emerald-500 border-b border-neutral-800 pb-2">Admin Details</h3>
               <div>

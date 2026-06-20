@@ -7,7 +7,7 @@ export default function SupportPage() {
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <header className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight mb-2">PRAL / FBR Support Liaison</h1>

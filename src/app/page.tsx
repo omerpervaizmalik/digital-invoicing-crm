@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { getCurrentTenant, getClients, getItems, getInvoices, getCurrentUser } from './actions';
 import { redirect } from 'next/navigation';
 
+import Image from 'next/image';
+
 export default async function Dashboard() {
   const user = await getCurrentUser();
   if (user?.role === 'ULTIMATE_ADMIN') {
@@ -22,11 +24,16 @@ export default async function Dashboard() {
       
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <header className="flex items-center justify-between mb-10">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight mb-2">{businessName} Invoice Management System</h1>
-            <p className="text-neutral-400">Monitor your real-time FBR digital invoicing metrics and system health.</p>
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-xl overflow-hidden relative shadow-lg shadow-emerald-500/20 bg-neutral-900 border border-neutral-800 shrink-0 hidden md:block">
+              <Image src="/logo.jpeg" alt="Get Legal Solution Logo" fill className="object-cover" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">{businessName} Invoice Management</h1>
+              <p className="text-neutral-400 text-sm md:text-base">Monitor your real-time FBR digital invoicing metrics and system health.</p>
+            </div>
           </div>
         </header>
 
