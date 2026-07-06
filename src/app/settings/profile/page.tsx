@@ -3,6 +3,7 @@ import { getCurrentTenant } from '../../actions';
 import { Building2, UploadCloud, AlertCircle } from 'lucide-react';
 import { updateTenantProfile } from '../../actions/tenant';
 import { redirect } from 'next/navigation';
+import ChangePasswordForm from './ChangePasswordForm';
 
 export default async function SettingsProfilePage() {
   const tenant = await getCurrentTenant();
@@ -126,6 +127,7 @@ export default async function SettingsProfilePage() {
           </div>
         </form>
 
+        <ChangePasswordForm />
       </main>
     </div>
   );

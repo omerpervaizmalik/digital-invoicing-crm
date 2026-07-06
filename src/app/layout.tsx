@@ -19,6 +19,8 @@ export const metadata: Metadata = {
 
 import { getCurrentTenant, getCurrentUser } from './actions';
 import GlobalNav from './components/GlobalNav';
+import { getSession } from '@/lib/session';
+import ImpersonationBanner from './components/ImpersonationBanner';
 
 export default async function RootLayout({
   children,
@@ -27,6 +29,7 @@ export default async function RootLayout({
 }>) {
   const tenant = await getCurrentTenant();
   const user = await getCurrentUser();
+  const session = await getSession();
   const businessName = tenant?.businessName || 'Get Legal Solution';
 
   return (
@@ -35,6 +38,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-white font-sans">
+        {session?.isImpersonated && <ImpersonationBanner userName={user?.name || 'User'} />}
         {(tenant || user) && <GlobalNav businessName={businessName} role={user?.role} />}
         {children}
       </body>
