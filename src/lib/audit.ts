@@ -1,4 +1,4 @@
-import prisma from './prisma';
+import { prisma } from './prisma';
 import { getSession } from './session';
 
 export async function logAction(
