@@ -5,9 +5,10 @@ import bcrypt from 'bcryptjs';
 import { createSession, deleteSession } from '../../lib/session';
 import { redirect } from 'next/navigation';
 
-export async function login(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+export async function login(prevStateOrFormData: any, maybeFormData?: FormData) {
+  const actualFormData = maybeFormData instanceof FormData ? maybeFormData : prevStateOrFormData as FormData;
+  const email = actualFormData.get('email') as string;
+  const password = actualFormData.get('password') as string;
 
   if (!email || !password) return { error: 'Please fill all fields' };
 
