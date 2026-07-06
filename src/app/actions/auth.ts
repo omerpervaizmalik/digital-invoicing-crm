@@ -5,17 +5,17 @@ import bcrypt from 'bcryptjs';
 import { createSession, deleteSession } from '../../lib/session';
 import { redirect } from 'next/navigation';
 
-export async function login(formData: FormData) {
+export async function login(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  if (!email || !password) throw new Error('Please fill all fields');
+  if (!email || !password) return { error: 'Please fill all fields' };
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error('Invalid credentials');
+  if (!user) return { error: 'Invalid email or password' };
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isValid) throw new Error('Invalid credentials');
+  if (!isValid) return { error: 'Invalid email or password' };
 
   let isProfileComplete = true;
   if (user.tenantId) {

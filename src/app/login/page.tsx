@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useActionState } from 'react';
 import { login } from '../actions/auth';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [state, formAction, isPending] = useActionState(login, null);
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 md:p-6 font-sans text-white relative">
@@ -19,7 +20,12 @@ export default function LoginPage() {
           <p className="text-neutral-400">Log in to Get Legal Solution DI</p>
         </div>
         
-        <form action={login} className="space-y-5">
+        <form action={formAction} className="space-y-5">
+          {state?.error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-xl text-sm text-center">
+              {state.error}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Email</label>
             <input 
@@ -47,8 +53,12 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
-          <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 py-3 rounded-xl font-bold transition-all shadow-lg mt-2">
-            Log In
+          <button 
+            type="submit" 
+            disabled={isPending}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-neutral-950 py-3 rounded-xl font-bold transition-all shadow-lg mt-2"
+          >
+            {isPending ? 'Logging in...' : 'Log In'}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-neutral-500">
