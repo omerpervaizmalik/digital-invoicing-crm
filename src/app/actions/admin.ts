@@ -16,7 +16,7 @@ async function verifyUltimateAdmin() {
 export async function adminCreateTenant(formData: FormData) {
   await verifyUltimateAdmin();
 
-  const email = formData.get('email') as string;
+  const email = (formData.get('email') as string).trim().toLowerCase();
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
   const businessName = formData.get('businessName') as string;
@@ -28,7 +28,7 @@ export async function adminCreateTenant(formData: FormData) {
     throw new Error('Please fill all required fields');
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
   if (existingUser) throw new Error('User already exists');
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -61,7 +61,7 @@ export async function adminCreateTenant(formData: FormData) {
 export async function adminCreateUser(formData: FormData) {
   await verifyUltimateAdmin();
   
-  const email = formData.get('email') as string;
+  const email = (formData.get('email') as string).trim().toLowerCase();
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
   const role = formData.get('role') as string;
@@ -69,7 +69,7 @@ export async function adminCreateUser(formData: FormData) {
 
   if (!email || !password || !name) throw new Error('Missing fields');
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
   if (existing) throw new Error('User already exists');
 
   const passwordHash = await bcrypt.hash(password, 10);

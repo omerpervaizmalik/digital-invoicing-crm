@@ -12,7 +12,11 @@ export async function login(prevStateOrFormData: any, maybeFormData?: FormData) 
 
   if (!email || !password) return { error: 'Please fill all fields' };
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({ 
+    where: { 
+      email: { equals: email.trim(), mode: 'insensitive' } 
+    } 
+  });
   if (!user) return { error: 'Invalid email or password' };
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
