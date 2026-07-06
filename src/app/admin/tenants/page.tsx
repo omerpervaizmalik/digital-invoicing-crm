@@ -23,6 +23,9 @@ export default async function AdminTenantsPage() {
           </h1>
           <p className="text-neutral-400">View and manage all registered companies across the platform.</p>
         </div>
+        <a href="/admin/tenants/new" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-2.5 rounded-xl font-bold transition-all transform active:scale-[0.98]">
+          Add New Tenant
+        </a>
       </header>
 
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">

@@ -51,9 +51,8 @@ export default function LoginPage() {
             Log In
           </button>
         </form>
-        
         <p className="mt-6 text-center text-sm text-neutral-500">
-          Don't have an account? <Link href="/signup" className="text-emerald-500 hover:underline">Sign up</Link>
+          For new accounts, please contact the platform administrator.
         </p>
       </div>
       
