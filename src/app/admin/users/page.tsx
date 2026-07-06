@@ -3,6 +3,7 @@ import { prisma } from '../../../lib/prisma';
 import { adminCreateUser, adminUpdateUserRole } from '../../actions/admin';
 import { Users, Plus, Shield } from 'lucide-react';
 import { DeleteButton } from '../components/DeleteButton';
+import { ImpersonateButton } from './ImpersonateButton';
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
@@ -78,6 +79,8 @@ export default async function AdminUsersPage() {
                               <input type="text" name="password" placeholder="New Password" required minLength={6} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 outline-none focus:border-red-500 text-xs w-32 text-neutral-300" />
                               <button type="submit" className="text-red-500 hover:text-red-400 font-bold text-xs bg-red-500/10 px-2 py-1 rounded">Reset Pass</button>
                             </form>
+                            
+                            <ImpersonateButton userId={u.id} userName={u.name} />
 
                             <form action={async () => {
                               'use server';
