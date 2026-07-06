@@ -36,7 +36,7 @@ export default function GlobalNav({ businessName, role }: { businessName: string
             <img src="/logo.png" alt="Get Legal Solution" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-lg tracking-tight text-white hidden sm:block">
-            {businessName} <span className="text-emerald-500">DI</span>
+            Get Legal Solution <span className="text-emerald-500">DI</span>
           </span>
           <span className="font-bold text-lg tracking-tight text-white sm:hidden">
             GLS <span className="text-emerald-500">DI</span>
