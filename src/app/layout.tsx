@@ -38,7 +38,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-white font-sans">
-        {session?.isImpersonated && <ImpersonationBanner userName={user?.name || 'User'} />}
+        {session?.isImpersonated === true && <ImpersonationBanner userName={user?.name || 'User'} />}
         {(tenant || user) && <GlobalNav businessName={businessName} role={user?.role} />}
         {children}
       </body>
