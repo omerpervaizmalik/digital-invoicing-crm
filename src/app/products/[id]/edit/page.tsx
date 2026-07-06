@@ -11,7 +11,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
   });
 
   if (!item) {
-    return <div className="p-12 text-white">Item not found.</div>;
+    return <div className="p-12 text-white">Product not found.</div>;
   }
 
   // Fetch current stock
@@ -31,7 +31,7 @@ export default async function EditItemPage({ params }: { params: Promise<{ id: s
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans p-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-extrabold tracking-tight mb-8">Edit Item</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight mb-8">Edit Product</h1>
         <EditItemForm item={item} currentStock={currentStock} />
       </div>
     </div>

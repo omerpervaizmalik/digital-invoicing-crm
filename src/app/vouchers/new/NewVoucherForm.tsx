@@ -74,7 +74,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
 
   const handleSaveItem = (addAnother: boolean) => {
     if (!currentItem.itemId) {
-      alert("Please select an item.");
+      alert("Please select a product.");
       return;
     }
     
@@ -132,7 +132,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
   const handleSave = async (status: string) => {
     const isPurchaseCat = invoiceCategory === 'Purchase';
     if ((isPurchaseCat && !supplierId) || (!isPurchaseCat && !clientId) || !invoiceDate || lineItems.length === 0) {
-      alert("Please fill in all required fields and add at least one item.");
+      alert("Please fill in all required fields and add at least one product.");
       return;
     }
 
@@ -259,7 +259,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
               <Receipt className="w-5 h-5 text-emerald-500" /> Line Items
             </h2>
             <button type="button" onClick={() => handleOpenModal(null)} className="flex items-center gap-1.5 text-sm font-bold text-emerald-500 hover:text-emerald-400">
-              <Plus className="w-4 h-4" /> Add Item
+              <Plus className="w-4 h-4" /> Add Product
             </button>
           </div>
 
@@ -279,7 +279,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
               </thead>
               <tbody className="divide-y divide-neutral-800/50">
                 {lineItems.length === 0 && (
-                  <tr><td colSpan={7} className="text-center py-6 text-neutral-500">No items added. Click 'Add Item' to start.</td></tr>
+                  <tr><td colSpan={7} className="text-center py-6 text-neutral-500">No products added. Click 'Add Product' to start.</td></tr>
                 )}
                 {lineItems.map((li, idx) => {
                   const is3rd = li.saleType?.toLowerCase().includes('3rd schedule');
@@ -366,7 +366,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
             
             <div className="flex items-center justify-between p-6 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
               <h3 className="text-xl font-bold text-white">
-                {editingIndex !== null ? 'Edit Item' : 'Add Item'}
+                {editingIndex !== null ? 'Edit Product' : 'Add Product'}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-neutral-400 hover:text-white transition-colors bg-neutral-800 hover:bg-neutral-700 p-2 rounded-lg">
                 <X className="w-5 h-5" />
@@ -378,16 +378,16 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
                 
                 {/* Core Item Info */}
                 <div className="space-y-4 md:col-span-2">
-                  <h4 className="text-emerald-500 font-bold text-sm uppercase tracking-wider">Item Details</h4>
+                  <h4 className="text-emerald-500 font-bold text-sm uppercase tracking-wider">Product Details</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-medium text-neutral-300">Product / Item *</label>
+                      <label className="text-sm font-medium text-neutral-300">Product *</label>
                       <select 
                         value={currentItem.itemId} 
                         onChange={e => updateCurrentItem('itemId', e.target.value)} 
                         className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
                       >
-                        {items.length === 0 && <option value="">No items available...</option>}
+                        {items.length === 0 && <option value="">No products available...</option>}
                         {items.map(item => (
                           <option key={item.id} value={item.id}>
                             {item.productDescription} (HS: {item.hsCode})
@@ -501,7 +501,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-neutral-300">Item Serial No.</label>
+                      <label className="text-sm font-medium text-neutral-300">Product Serial No.</label>
                       <select 
                         value={currentItem.sroItemSerialNo} 
                         onChange={e => updateCurrentItem('sroItemSerialNo', e.target.value)} 

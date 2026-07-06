@@ -15,12 +15,12 @@ export default async function ItemsPage() {
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <header className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight mb-2">Item File Catalog</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2">Product Catalog</h1>
             <p className="text-neutral-400">Manage products linked to official FBR HS Codes and Tax Rates.</p>
           </div>
-          <Link href="/items/new" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-2.5 rounded-xl font-bold transition-all transform active:scale-[0.98]">
+          <Link href="/products/new" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-2.5 rounded-xl font-bold transition-all transform active:scale-[0.98]">
             <Plus className="w-5 h-5" />
-            Add New Item
+            Add New Product
           </Link>
         </header>
 
@@ -30,7 +30,7 @@ export default async function ItemsPage() {
               <Search className="w-5 h-5 text-neutral-500 absolute left-4 top-3" />
               <input 
                 type="text" 
-                placeholder="Search items by description or HS Code..." 
+                placeholder="Search products by description or HS Code..." 
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 pl-12 pr-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -50,7 +50,7 @@ export default async function ItemsPage() {
               </thead>
               <tbody className="divide-y divide-neutral-800/50">
                 {items.length === 0 && (
-                  <tr><td colSpan={5} className="p-8 text-center text-neutral-500">No items found in catalog.</td></tr>
+                  <tr><td colSpan={5} className="p-8 text-center text-neutral-500">No products found in catalog.</td></tr>
                 )}
                 {items.map((item: any) => (
                   <tr key={item.id} className="hover:bg-neutral-800/20 transition-colors">
@@ -71,7 +71,7 @@ export default async function ItemsPage() {
                     <td className="px-4 py-4 text-neutral-400">{item.uoM}</td>
                     <td className="px-4 py-4 text-emerald-400 font-bold font-mono">{item.currentStock}</td>
                     <td className="px-4 py-4 text-right">
-                      <Link href={`/items/${item.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
+                      <Link href={`/products/${item.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
                     </td>
                   </tr>
                 ))}

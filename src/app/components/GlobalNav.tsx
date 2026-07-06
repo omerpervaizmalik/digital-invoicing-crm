@@ -15,7 +15,7 @@ export default function GlobalNav({ businessName, role }: { businessName: string
     { name: 'Dashboard', href: '/' },
     { name: 'Clients', href: '/clients' },
     { name: 'Suppliers', href: '/suppliers' },
-    { name: 'Items', href: '/items' },
+    { name: 'Products', href: '/products' },
     { name: 'Vouchers', href: '/vouchers' },
     { name: 'Stock Register', href: '/stock-register' },
   ];

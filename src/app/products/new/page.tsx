@@ -13,12 +13,12 @@ export default async function NewItemPage() {
       
 
       <main className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <Link href="/items" className="inline-flex items-center text-sm font-medium text-emerald-500 hover:text-emerald-400 mb-6">
+        <Link href="/products" className="inline-flex items-center text-sm font-medium text-emerald-500 hover:text-emerald-400 mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Catalog
         </Link>
         
         <header className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Create New Item</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Create New Product</h1>
           <p className="text-neutral-400">Map an internal product to official FBR APIs parameters.</p>
         </header>
 

@@ -31,7 +31,7 @@ export default function NewItemForm({ tenantId }: { tenantId: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!itemCode || !desc || !hsCode) {
-      alert("Please provide the Item Code, Product Description, and FBR HS Code.");
+      alert("Please provide the Product Code, Product Description, and FBR HS Code.");
       return;
     }
     
@@ -53,10 +53,10 @@ export default function NewItemForm({ tenantId }: { tenantId: string }) {
         sroItemSerialNo: sroItemSerialNo || null,
         petroleumLevyOn: petroleumLevyOn || null
       });
-      router.push('/items');
+      router.push('/products');
     } catch (err) {
       console.error(err);
-      alert('Failed to save item.');
+      alert('Failed to save product.');
     } finally {
       setIsLoading(false);
     }
@@ -66,12 +66,12 @@ export default function NewItemForm({ tenantId }: { tenantId: string }) {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="p-8 rounded-2xl bg-neutral-900 border border-neutral-800">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <Package className="w-5 h-5 text-emerald-500" /> Item Configuration
+          <Package className="w-5 h-5 text-emerald-500" /> Product Configuration
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 col-span-2 md:col-span-1">
-            <label className="text-sm font-medium text-neutral-300">Unique Item Code *</label>
+            <label className="text-sm font-medium text-neutral-300">Unique Product Code *</label>
             <input 
               required 
               type="text" 
@@ -207,7 +207,7 @@ export default function NewItemForm({ tenantId }: { tenantId: string }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300">Item S. No.</label>
+            <label className="text-sm font-medium text-neutral-300">Product S. No.</label>
             <select 
               value={sroItemSerialNo}
               onChange={e => setSroItemSerialNo(e.target.value)}
@@ -268,7 +268,7 @@ export default function NewItemForm({ tenantId }: { tenantId: string }) {
           className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:hover:bg-emerald-500 text-neutral-950 px-8 py-3 rounded-xl font-bold transition-all transform active:scale-[0.98]"
         >
           <Save className="w-5 h-5" />
-          {isLoading ? 'Saving...' : 'Save Item'}
+          {isLoading ? 'Saving...' : 'Save Product'}
         </button>
       </div>
     </form>

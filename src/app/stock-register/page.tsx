@@ -72,14 +72,14 @@ export default async function StockRegisterPage({
               <thead className="bg-neutral-950 text-neutral-400 border-b border-neutral-800">
                 <tr>
                   <th rowSpan={2} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Sr. No.</th>
-                  <th colSpan={3} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Item Details</th>
+                  <th colSpan={3} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Product Details</th>
                   <th colSpan={2} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Opening Balance</th>
                   <th colSpan={2} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Purchased / Imported during month</th>
                   <th colSpan={6} className="px-4 py-3 border-r border-neutral-800 font-medium text-center bg-neutral-900/50">Goods Supplied During the Month</th>
                   <th colSpan={2} className="px-4 py-3 font-medium text-center bg-neutral-900/50">Closing Balance</th>
                 </tr>
                 <tr className="text-xs uppercase tracking-wider bg-neutral-950/80">
-                  {/* Item Details */}
+                  {/* Product Details */}
                   <th className="px-4 py-2 border-r border-t border-neutral-800 font-medium">HS Code</th>
                   <th className="px-4 py-2 border-r border-t border-neutral-800 font-medium text-center">UoM</th>
                   <th className="px-4 py-2 border-r border-t border-neutral-800 font-medium text-right">Tax Rate</th>

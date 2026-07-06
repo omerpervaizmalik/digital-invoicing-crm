@@ -55,7 +55,7 @@ export default async function Dashboard() {
 
           <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-emerald-500/50 transition-colors group">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-neutral-400">Item Catalog</h3>
+              <h3 className="font-medium text-neutral-400">Product Catalog</h3>
               <Package className="w-5 h-5 text-emerald-500" />
             </div>
             <p className="text-3xl font-mono font-bold">{items.length}</p>
