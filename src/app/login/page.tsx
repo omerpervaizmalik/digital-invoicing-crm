@@ -1,9 +1,13 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { login } from '../actions/auth';
 import Link from 'next/link';
-import Image from 'next/image';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4 md:p-6 font-sans text-white relative">
       <div className="max-w-md w-full bg-neutral-900 border border-neutral-800 p-6 md:p-8 rounded-2xl shadow-xl z-10">
@@ -27,12 +31,21 @@ export default function LoginPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Password</label>
-            <input 
-              type="password" 
-              name="password" 
-              required 
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-            />
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                required 
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 pr-12 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-neutral-400 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
           <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 py-3 rounded-xl font-bold transition-all shadow-lg mt-2">
             Log In
