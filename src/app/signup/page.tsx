@@ -56,6 +56,13 @@ export default function SignupPage() {
             </div>
           </div>
           
+          <div className="flex items-start gap-3 mt-4">
+            <input type="checkbox" name="agreeTerms" id="agreeTerms" required className="mt-1 h-4 w-4 rounded border-neutral-700 bg-neutral-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-neutral-950" />
+            <label htmlFor="agreeTerms" className="text-sm text-neutral-400">
+              I agree to the <Link href="/terms" target="_blank" className="text-emerald-500 hover:underline">Terms of Service</Link> and <Link href="/privacy" target="_blank" className="text-emerald-500 hover:underline">Privacy Policy</Link>.
+            </label>
+          </div>
+          
           <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 py-3 rounded-xl font-bold transition-all shadow-lg mt-4">
             Sign Up & Create Workspace
           </button>
@@ -68,8 +75,8 @@ export default function SignupPage() {
 
       {/* Footer Links */}
       <div className="absolute bottom-8 left-0 right-0 flex justify-center space-x-8 text-xs font-bold text-neutral-600 uppercase tracking-widest">
-        <a href="https://getlegalsolution.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Privacy Policy</a>
-        <a href="https://getlegalsolution.com/terms-of-service" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Terms of Service</a>
+        <Link href="/privacy" className="hover:text-emerald-500 transition-colors">Privacy Policy</Link>
+        <Link href="/terms" className="hover:text-emerald-500 transition-colors">Terms of Service</Link>
         <a href="https://getlegalsolution.com/contact.html" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Help Center</a>
       </div>
     </div>

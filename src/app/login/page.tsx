@@ -59,8 +59,8 @@ export default function LoginPage() {
       
       {/* Footer Links */}
       <div className="absolute bottom-8 left-0 right-0 flex justify-center space-x-8 text-xs font-bold text-neutral-600 uppercase tracking-widest">
-        <a href="https://getlegalsolution.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Privacy Policy</a>
-        <a href="https://getlegalsolution.com/terms-of-service" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Terms of Service</a>
+        <Link href="/privacy" className="hover:text-emerald-500 transition-colors">Privacy Policy</Link>
+        <Link href="/terms" className="hover:text-emerald-500 transition-colors">Terms of Service</Link>
         <a href="https://getlegalsolution.com/contact.html" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">Help Center</a>
       </div>
     </div>
