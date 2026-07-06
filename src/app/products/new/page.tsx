@@ -19,10 +19,14 @@ export default async function NewItemPage() {
         
         <header className="mb-8">
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Create New Product</h1>
-          <p className="text-neutral-400">Map an internal product to official FBR APIs parameters.</p>
+          <p className="text-neutral-400">Map an internal product to official FBR API parameters.</p>
         </header>
 
-        {tenant && <NewItemForm tenantId={tenant.id} />}
+        {tenant ? <NewItemForm tenantId={tenant.id} /> : (
+          <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
+            You must be logged in as a tenant or impersonating a tenant to create a product.
+          </div>
+        )}
       </main>
     </div>
   );

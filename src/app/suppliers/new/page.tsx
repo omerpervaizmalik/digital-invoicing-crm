@@ -20,7 +20,11 @@ export default async function NewSupplierPage() {
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Register New Supplier</h1>
           <p className="text-neutral-400">Add a new vendor or supplier profile to your system.</p>
         </div>
-        <NewSupplierForm tenantId={tenant?.id || ''} />
+        {tenant ? <NewSupplierForm tenantId={tenant.id} /> : (
+          <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
+            You must be logged in as a tenant or impersonating a tenant to add a supplier.
+          </div>
+        )}
       </main>
     </div>
   );

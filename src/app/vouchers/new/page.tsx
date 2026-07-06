@@ -25,7 +25,11 @@ export default async function NewVoucherPage() {
           <p className="text-neutral-400">Generate a new transaction and post it instantly to the FBR API.</p>
         </header>
 
-        {tenant && <NewVoucherForm clients={clients} suppliers={suppliers} items={items} tenantId={tenant.id} />}
+        {tenant ? <NewVoucherForm clients={clients} suppliers={suppliers} items={items} tenantId={tenant.id} /> : (
+          <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
+            You must be logged in as a tenant or impersonating a tenant to add a voucher.
+          </div>
+        )}
       </main>
     </div>
   );
