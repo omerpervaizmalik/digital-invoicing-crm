@@ -1,5 +1,7 @@
 'use server';
 
+import bcrypt from 'bcryptjs';
+
 import { prisma } from '../../lib/prisma';
 import { getCurrentTenant, getCurrentUser } from '../actions';
 import { revalidatePath } from 'next/cache';
@@ -121,7 +123,6 @@ export async function tenantCreateUser(formData: FormData) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error('User with this email already exists');
 
-  const bcrypt = require('bcryptjs');
   const passwordHash = await bcrypt.hash(password, 10);
 
   await prisma.user.create({
