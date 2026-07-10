@@ -3,7 +3,8 @@ import { prisma } from '../../../lib/prisma';
 import { getCurrentTenant, getCurrentUser } from '../../actions';
 import { Users, Plus, Shield, ShieldCheck } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { tenantCreateUser, tenantUpdateUserRole, tenantDeleteUser } from '../../actions/tenant';
+import Link from 'next/link';
+import { tenantCreateUser, tenantDeleteUser } from '../../actions/tenant';
 import { DeleteButton } from '../../admin/components/DeleteButton';
 
 export default async function SettingsUsersPage() {
@@ -111,16 +112,9 @@ export default async function SettingsUsersPage() {
                 <td className="py-4 text-right">
                   {u.role !== 'TENANT_ADMIN' ? (
                     <div className="flex items-center justify-end gap-3">
-                      <form action={async (formData: FormData) => {
-                        'use server';
-                        await tenantUpdateUserRole(u.id, formData.get('role') as string);
-                      }} className="flex items-center gap-2">
-                        <select name="role" defaultValue={u.role} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 outline-none focus:border-emerald-500 text-xs text-white">
-                          <option value="STANDARD_USER">STANDARD USER</option>
-                          <option value="SUPERVISOR">SUPERVISOR</option>
-                        </select>
-                        <button type="submit" className="text-emerald-500 hover:text-emerald-400 font-bold text-xs">Update</button>
-                      </form>
+                      <Link href={`/settings/users/${u.id}/edit`} className="text-emerald-500 hover:text-emerald-400 font-bold text-xs bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-colors">
+                        Edit
+                      </Link>
                       
                       <form action={async () => {
                         'use server';

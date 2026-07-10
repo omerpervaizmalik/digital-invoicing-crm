@@ -138,21 +138,27 @@ export async function tenantCreateUser(formData: FormData) {
   revalidatePath('/settings/users');
 }
 
-export async function tenantUpdateUserRole(userId: string, newRole: string) {
+export async function tenantUpdateUser(userId: string, formData: FormData) {
   const tenant = await getCurrentTenant();
   const currentUser = await getCurrentUser();
   if (!tenant || currentUser?.role !== 'TENANT_ADMIN') throw new Error('Unauthorized');
 
-  // Verify the target user belongs to this tenant
   const targetUser = await prisma.user.findUnique({ where: { id: userId } });
   if (!targetUser || targetUser.tenantId !== tenant.id) throw new Error('Unauthorized');
-  
-  // Prevent changing their own role
-  if (userId === currentUser.id) throw new Error('Cannot change your own role');
+
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const role = formData.get('role') as string;
+
+  if (!name || !email || !role) throw new Error('Missing fields');
+
+  if (userId === currentUser.id && role !== 'TENANT_ADMIN') {
+    throw new Error('Cannot change your own role from TENANT_ADMIN');
+  }
 
   await prisma.user.update({
     where: { id: userId },
-    data: { role: newRole }
+    data: { name, email, role }
   });
 
   revalidatePath('/settings/users');
