@@ -1,15 +1,20 @@
 import React from 'react';
-import { getCurrentTenant } from '../../actions';
+import { getCurrentTenant, getCurrentUser } from '../../actions';
 import { Building2, UploadCloud, AlertCircle } from 'lucide-react';
 import { updateTenantProfile } from '../../actions/tenant';
 import { redirect } from 'next/navigation';
-import ChangePasswordForm from './ChangePasswordForm';
+
 
 export default async function SettingsProfilePage() {
   const tenant = await getCurrentTenant();
+  const user = await getCurrentUser();
   
-  if (!tenant) {
+  if (!tenant || !user) {
     redirect('/login');
+  }
+
+  if (user.role === 'STANDARD_USER') {
+    redirect('/settings/security');
   }
 
   return (
@@ -127,7 +132,7 @@ export default async function SettingsProfilePage() {
           </div>
         </form>
 
-        <ChangePasswordForm />
+
       </main>
     </div>
   );

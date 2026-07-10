@@ -22,6 +22,8 @@ export default function GlobalNav({ businessName, role }: { businessName: string
 
   if (role === 'ULTIMATE_ADMIN') {
     links.push({ name: 'Admin Portal', href: '/admin' });
+  } else if (role === 'STANDARD_USER') {
+    links.push({ name: 'Settings', href: '/settings/security' });
   } else {
     links.push({ name: 'Settings', href: '/settings/profile' });
   }

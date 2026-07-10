@@ -1,6 +1,6 @@
 import React from 'react';
 import { prisma } from '../../../lib/prisma';
-import { getCurrentTenant } from '../../actions';
+import { getCurrentTenant, getCurrentUser } from '../../actions';
 import { Users, Plus, Shield, ShieldCheck } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { tenantCreateUser, tenantUpdateUserRole, tenantDeleteUser } from '../../actions/tenant';
@@ -8,9 +8,14 @@ import { DeleteButton } from '../../admin/components/DeleteButton';
 
 export default async function SettingsUsersPage() {
   const tenant = await getCurrentTenant();
+  const user = await getCurrentUser();
   
-  if (!tenant) {
+  if (!tenant || !user) {
     redirect('/login');
+  }
+
+  if (user.role === 'STANDARD_USER') {
+    redirect('/settings/security');
   }
 
   const subscription = await prisma.subscription.findUnique({ where: { tenantId: tenant.id } });
