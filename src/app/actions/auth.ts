@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { createSession, deleteSession } from '../../lib/session';
 import { redirect } from 'next/navigation';
+import { logActivity } from '../../lib/activityLogger';
 
 export async function login(prevStateOrFormData: any, maybeFormData?: FormData) {
   const actualFormData = maybeFormData instanceof FormData ? maybeFormData : prevStateOrFormData as FormData;
@@ -29,6 +30,10 @@ export async function login(prevStateOrFormData: any, maybeFormData?: FormData) 
   }
 
   await createSession(user.id, user.tenantId, user.role, isProfileComplete);
+  
+  if (user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'LOGIN', 'USER', `User logged in from IP (auth)`);
+  }
   
   if (user.role === 'ULTIMATE_ADMIN') {
     redirect('/admin');

@@ -9,6 +9,7 @@ import { createSession } from '../../lib/session';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
+import { logActivity } from '../../lib/activityLogger';
 
 export async function updateTenantProfile(formData: FormData) {
   try {
@@ -75,6 +76,8 @@ export async function updateTenantProfile(formData: FormData) {
 
     // Recreate session with isProfileComplete = true
     await createSession(user.id, tenant.id, user.role, true);
+    
+    await logActivity(tenant.id, user.id, 'UPDATE', 'TENANT', 'Updated company profile');
 
     revalidatePath('/');
     revalidatePath('/settings/profile');
@@ -135,6 +138,8 @@ export async function tenantCreateUser(formData: FormData) {
     }
   });
 
+  await logActivity(tenant.id, currentUser.id, 'CREATE', 'USER', `Created user: ${name} (${email}) as ${role}`);
+
   revalidatePath('/settings/users');
 }
 
@@ -161,6 +166,8 @@ export async function tenantUpdateUser(userId: string, formData: FormData) {
     data: { name, email, role }
   });
 
+  await logActivity(tenant.id, currentUser.id, 'UPDATE', 'USER', `Updated user: ${name} (${email}) to ${role}`);
+
   revalidatePath('/settings/users');
 }
 
@@ -177,6 +184,8 @@ export async function tenantDeleteUser(userId: string) {
   if (userId === currentUser.id) throw new Error('Cannot delete your own account');
 
   await prisma.user.delete({ where: { id: userId } });
+
+  await logActivity(tenant.id, currentUser.id, 'DELETE', 'USER', `Deleted user: ${targetUser.name} (${targetUser.email})`);
 
   revalidatePath('/settings/users');
 }

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '../actions';
 import { logAction } from '@/lib/audit';
 
+import { logActivity } from '@/lib/activityLogger';
+
 export async function changeUserPassword(currentPassword: string, newPassword: string) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
@@ -21,6 +23,9 @@ export async function changeUserPassword(currentPassword: string, newPassword: s
   });
 
   await logAction('CHANGE_PASSWORD', user.id, user.tenantId, 'User changed their password');
+  if (user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'USER', 'Changed own password');
+  }
   
   return { success: true };
 }

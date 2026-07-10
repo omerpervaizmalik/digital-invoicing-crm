@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '../lib/session'
 import { redirect } from 'next/navigation'
+import { logActivity } from '../lib/activityLogger'
 
 const prisma = new PrismaClient()
 
@@ -42,7 +43,11 @@ export async function getClients(tenantId: string) {
 }
 
 export async function createClient(data: any) {
-  await prisma.client.create({ data })
+  const client = await prisma.client.create({ data })
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'CREATE', 'CLIENT', `Created client: ${client.buyerBusinessName}`)
+  }
   revalidatePath('/clients')
 }
 
@@ -52,12 +57,20 @@ export async function getSuppliers(tenantId: string) {
 }
 
 export async function createSupplier(data: any) {
-  await prisma.supplier.create({ data })
+  const supplier = await prisma.supplier.create({ data })
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'CREATE', 'SUPPLIER', `Created supplier: ${supplier.sellerBusinessName}`)
+  }
   revalidatePath('/suppliers')
 }
 
 export async function updateSupplier(id: string, data: any) {
-  await prisma.supplier.update({ where: { id }, data })
+  const supplier = await prisma.supplier.update({ where: { id }, data })
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'SUPPLIER', `Updated supplier: ${supplier.sellerBusinessName}`)
+  }
   revalidatePath('/suppliers')
 }
 
@@ -93,6 +106,11 @@ export async function createItem(data: any) {
       qty: parseFloat(initialStock) || 0,
       type: 'opening'
     });
+  }
+
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'CREATE', 'ITEM', `Created catalog item: ${item.itemCode}`)
   }
 
   revalidatePath('/items');
@@ -138,6 +156,8 @@ export async function createInvoice(data: any) {
     }
   }
   
+  await logActivity(inv.tenantId, user.id, 'CREATE', 'INVOICE', `Created invoice: V-${inv.voucherNumber} (${inv.status})`)
+  
   revalidatePath('/vouchers')
   revalidatePath('/')
   return inv
@@ -160,6 +180,7 @@ export async function approveInvoice(id: string) {
   } catch (err) {
     console.error("Stock update failed on approval:", err)
   }
+  await logActivity(inv.tenantId, user.id, 'UPDATE', 'INVOICE', `Approved invoice: V-${inv.voucherNumber}`)
   revalidatePath('/vouchers')
   revalidatePath('/')
   return inv;
@@ -174,6 +195,10 @@ export async function postDraftToFBR(id: string) {
     await processInvoiceToStock(inv.id)
   } catch (err) {
     console.error("Stock update failed on draft post:", err)
+  }
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'INVOICE', `Posted invoice to FBR: V-${inv.voucherNumber}`)
   }
   revalidatePath('/vouchers')
   revalidatePath('/')
@@ -270,6 +295,10 @@ export async function addManualStock(data: any) {
   });
 
   await recalculateClosingBalance(tenantId, itemCode, monthYear);
+  const user = await getCurrentUser();
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'CREATE', 'STOCK', `Manual stock entry for ${itemCode} (${type}): Qty ${qty}`)
+  }
   revalidatePath('/stock-register');
   revalidatePath('/items');
 }
@@ -279,6 +308,10 @@ export async function updateItem(id: string, data: any) {
     where: { id },
     data
   });
+  const user = await getCurrentUser();
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'ITEM', `Updated catalog item: ${item.itemCode}`)
+  }
   revalidatePath('/items');
   return item;
 }

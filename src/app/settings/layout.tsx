@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Settings, Users } from 'lucide-react';
+import { ShieldCheck, Settings, Users, Activity } from 'lucide-react';
 import { getCurrentUser } from '../actions';
 
 export default async function SettingsLayout({
@@ -32,6 +32,10 @@ export default async function SettingsLayout({
                 <Link href="/settings/users" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors">
                   <Users className="w-5 h-5 text-emerald-500" />
                   Users
+                </Link>
+                <Link href="/settings/logs" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/50 transition-colors">
+                  <Activity className="w-5 h-5 text-emerald-500" />
+                  Activity Logs
                 </Link>
               </>
             )}
