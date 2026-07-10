@@ -9,72 +9,81 @@ import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 
 export async function updateTenantProfile(formData: FormData) {
-  const tenant = await getCurrentTenant();
-  const user = await getCurrentUser();
-  if (!tenant || !user) throw new Error('Unauthorized');
+  try {
+    const tenant = await getCurrentTenant();
+    const user = await getCurrentUser();
+    if (!tenant || !user) throw new Error('Unauthorized');
 
-  const businessName = formData.get('businessName') as string;
-  const ntnCnic = formData.get('ntnCnic') as string;
-  const province = formData.get('province') as string;
-  const address = formData.get('address') as string;
-  const businessNature = formData.get('businessNature') as string;
-  const sector = formData.get('sector') as string;
-  const phone = formData.get('phone') as string;
-  const email = formData.get('email') as string;
-  const website = formData.get('website') as string;
+    const businessName = formData.get('businessName') as string;
+    const ntnCnic = formData.get('ntnCnic') as string;
+    const province = formData.get('province') as string;
+    const address = formData.get('address') as string;
+    const businessNature = formData.get('businessNature') as string;
+    const sector = formData.get('sector') as string;
+    const phone = formData.get('phone') as string;
+    const email = formData.get('email') as string;
+    const website = formData.get('website') as string;
 
-  const logoFile = formData.get('logo') as File | null;
-  let logoUrl = tenant.logoUrl;
+    const logoFile = formData.get('logo') as File | null;
+    let logoUrl = tenant.logoUrl;
 
-  if (logoFile && logoFile.size > 0) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!
-    );
-    const buffer = Buffer.from(await logoFile.arrayBuffer());
-    const fileName = `${tenant.id}-${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-    
-    const { data, error } = await supabase.storage
-      .from('tenant-logos')
-      .upload(fileName, buffer, {
-        contentType: logoFile.type || 'image/png',
-        upsert: true
-      });
-
-    if (error) {
-      console.error('Supabase Upload Error:', error);
-      throw new Error('Failed to upload logo to Cloud Storage.');
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from('tenant-logos')
-      .getPublicUrl(fileName);
+    if (logoFile && logoFile.size > 0) {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_ANON_KEY!
+      );
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const fileName = `${tenant.id}-${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
       
-    logoUrl = publicUrlData.publicUrl;
-  }
+      const { data, error } = await supabase.storage
+        .from('tenant-logos')
+        .upload(fileName, arrayBuffer, {
+          contentType: logoFile.type || 'image/png',
+          upsert: true
+        });
 
-  await prisma.tenant.update({
-    where: { id: tenant.id },
-    data: {
-      businessName,
-      ntnCnic,
-      province,
-      address,
-      businessNature,
-      sector,
-      phone,
-      email,
-      website,
-      logoUrl,
-      isProfileComplete: true
+      if (error) {
+        console.error('Supabase Upload Error:', error);
+        throw new Error('Failed to upload logo to Cloud Storage.');
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('tenant-logos')
+        .getPublicUrl(fileName);
+        
+      logoUrl = publicUrlData.publicUrl;
     }
-  });
 
-  // Recreate session with isProfileComplete = true
-  await createSession(user.id, tenant.id, user.role, true);
+    await prisma.tenant.update({
+      where: { id: tenant.id },
+      data: {
+        businessName,
+        ntnCnic,
+        province,
+        address,
+        businessNature,
+        sector,
+        phone,
+        email,
+        website,
+        logoUrl,
+        isProfileComplete: true
+      }
+    });
 
-  revalidatePath('/');
-  revalidatePath('/settings/profile');
+    // Recreate session with isProfileComplete = true
+    await createSession(user.id, tenant.id, user.role, true);
+
+    revalidatePath('/');
+    revalidatePath('/settings/profile');
+  } catch (err: any) {
+    require('fs').writeFileSync('e:/difbr/get-legal-crm/error-log.json', JSON.stringify({
+      message: err.message,
+      stack: err.stack,
+      name: err.name
+    }, null, 2));
+    throw err;
+  }
 }
 
 export async function adminToggleTenantProfileComplete(tenantId: string, isComplete: boolean) {
