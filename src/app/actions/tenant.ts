@@ -77,11 +77,11 @@ export async function updateTenantProfile(formData: FormData) {
     revalidatePath('/');
     revalidatePath('/settings/profile');
   } catch (err: any) {
-    require('fs').writeFileSync('e:/difbr/get-legal-crm/error-log.json', JSON.stringify({
+    console.error('Update Tenant Profile Error:', {
       message: err.message,
       stack: err.stack,
       name: err.name
-    }, null, 2));
+    });
     throw err;
   }
 }
