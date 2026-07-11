@@ -12,6 +12,7 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
   const [ntn, setNtn] = useState('');
   const [province, setProvince] = useState('Punjab');
   const [address, setAddress] = useState('');
+  const [contactNo, setContactNo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,12 +30,13 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
         buyerRegistrationType: type,
         buyerNTNCNIC: ntn,
         buyerProvince: province,
-        buyerAddress: address
+        buyerAddress: address,
+        contactNo
       });
       router.push('/clients');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to save client.');
+      alert(err.message || 'Failed to save client.');
     } finally {
       setIsLoading(false);
     }
@@ -73,15 +75,26 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300">NTN / CNIC</label>
+            <label className="text-sm font-medium text-neutral-300">NTN / CNIC *</label>
             <input 
+              required
               type="text" 
               value={ntn}
               onChange={e => setNtn(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors" 
               placeholder="7 or 13 digits" 
             />
-            <p className="text-xs text-neutral-500">Required if type is Registered.</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-300">Contact No</label>
+            <input 
+              type="text" 
+              value={contactNo}
+              onChange={e => setContactNo(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors" 
+              placeholder="Phone number" 
+            />
           </div>
 
           <div className="space-y-2">

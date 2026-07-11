@@ -78,6 +78,7 @@ model Supplier {
   sellerProvince        String
   sellerAddress         String
   sellerRegistrationType String     // "Registered" | "Unregistered"
+  contactNo             String?
   
   invoices              Invoice[]
   
@@ -95,6 +96,7 @@ model Client {
   buyerProvince         String
   buyerAddress          String
   buyerRegistrationType String      // "Registered" | "Unregistered"
+  contactNo             String?
   
   invoices              Invoice[]
   

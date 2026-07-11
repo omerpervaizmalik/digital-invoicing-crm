@@ -42,6 +42,7 @@ export default async function SuppliersPage() {
                 <tr>
                   <th className="px-4 py-4 font-medium">Business Name</th>
                   <th className="px-4 py-4 font-medium">NTN / CNIC</th>
+                  <th className="px-4 py-4 font-medium">Contact No</th>
                   <th className="px-4 py-4 font-medium">Province</th>
                   <th className="px-4 py-4 font-medium">Status</th>
                   <th className="px-4 py-4 font-medium text-right">Actions</th>
@@ -62,6 +63,7 @@ export default async function SuppliersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 font-mono text-emerald-500">{supplier.sellerNTNCNIC || 'N/A'}</td>
+                    <td className="px-4 py-4 text-neutral-400">{supplier.contactNo || '-'}</td>
                     <td className="px-4 py-4 text-neutral-400">{supplier.sellerProvince}</td>
                     <td className="px-4 py-4">
                       {supplier.sellerRegistrationType === 'Registered' ? (

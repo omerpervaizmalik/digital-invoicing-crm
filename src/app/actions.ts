@@ -43,6 +43,19 @@ export async function getClients(tenantId: string) {
 }
 
 export async function createClient(data: any) {
+  const existing = await prisma.client.findFirst({
+    where: {
+      tenantId: data.tenantId,
+      OR: [
+        { buyerBusinessName: data.buyerBusinessName },
+        ...(data.buyerNTNCNIC ? [{ buyerNTNCNIC: data.buyerNTNCNIC }] : [])
+      ]
+    }
+  });
+  if (existing) {
+    throw new Error("A Client with this Business Name or NTN/CNIC already exists.");
+  }
+
   const client = await prisma.client.create({ data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {
@@ -57,6 +70,19 @@ export async function getSuppliers(tenantId: string) {
 }
 
 export async function createSupplier(data: any) {
+  const existing = await prisma.supplier.findFirst({
+    where: {
+      tenantId: data.tenantId,
+      OR: [
+        { sellerBusinessName: data.sellerBusinessName },
+        ...(data.sellerNTNCNIC ? [{ sellerNTNCNIC: data.sellerNTNCNIC }] : [])
+      ]
+    }
+  });
+  if (existing) {
+    throw new Error("A Supplier with this Business Name or NTN/CNIC already exists.");
+  }
+
   const supplier = await prisma.supplier.create({ data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {
@@ -66,6 +92,23 @@ export async function createSupplier(data: any) {
 }
 
 export async function updateSupplier(id: string, data: any) {
+  const currentSupplier = await prisma.supplier.findUnique({ where: { id } });
+  if (!currentSupplier) throw new Error("Supplier not found");
+
+  const existing = await prisma.supplier.findFirst({
+    where: {
+      tenantId: currentSupplier.tenantId,
+      id: { not: id },
+      OR: [
+        { sellerBusinessName: data.sellerBusinessName },
+        ...(data.sellerNTNCNIC ? [{ sellerNTNCNIC: data.sellerNTNCNIC }] : [])
+      ]
+    }
+  });
+  if (existing) {
+    throw new Error("Another Supplier with this Business Name or NTN/CNIC already exists.");
+  }
+
   const supplier = await prisma.supplier.update({ where: { id }, data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {

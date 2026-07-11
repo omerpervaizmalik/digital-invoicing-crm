@@ -14,21 +14,29 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
   const [province, setProvince] = useState(supplier.sellerProvince);
   const [address, setAddress] = useState(supplier.sellerAddress);
   const [registrationType, setRegistrationType] = useState(supplier.sellerRegistrationType);
+  const [contactNo, setContactNo] = useState(supplier.contactNo || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    await updateSupplier(supplier.id, {
-      sellerBusinessName: businessName,
-      sellerNTNCNIC: ntnCnic,
-      sellerProvince: province,
-      sellerAddress: address,
-      sellerRegistrationType: registrationType
-    });
-    
-    router.push('/suppliers');
-    router.refresh();
+    try {
+      await updateSupplier(supplier.id, {
+        sellerBusinessName: businessName,
+        sellerNTNCNIC: ntnCnic,
+        sellerProvince: province,
+        sellerAddress: address,
+        sellerRegistrationType: registrationType,
+        contactNo
+      });
+      
+      router.push('/suppliers');
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Failed to update supplier.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,12 +66,23 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-neutral-300">NTN / CNIC</label>
+          <label className="text-sm font-semibold text-neutral-300">NTN / CNIC <span className="text-emerald-500">*</span></label>
           <input 
+            required
             type="text" 
             value={ntnCnic}
             onChange={e => setNtnCnic(e.target.value)}
             className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-neutral-300">Contact No</label>
+          <input 
+            type="text" 
+            value={contactNo}
+            onChange={e => setContactNo(e.target.value)}
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>
 

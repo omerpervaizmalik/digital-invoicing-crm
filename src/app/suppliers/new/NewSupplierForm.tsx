@@ -14,22 +14,30 @@ export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
   const [province, setProvince] = useState('Punjab');
   const [address, setAddress] = useState('');
   const [registrationType, setRegistrationType] = useState('Registered');
+  const [contactNo, setContactNo] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    await createSupplier({
-      tenantId,
-      sellerBusinessName: businessName,
-      sellerNTNCNIC: ntnCnic,
-      sellerProvince: province,
-      sellerAddress: address,
-      sellerRegistrationType: registrationType
-    });
-    
-    router.push('/suppliers');
-    router.refresh();
+    try {
+      await createSupplier({
+        tenantId,
+        sellerBusinessName: businessName,
+        sellerNTNCNIC: ntnCnic,
+        sellerProvince: province,
+        sellerAddress: address,
+        sellerRegistrationType: registrationType,
+        contactNo
+      });
+      
+      router.push('/suppliers');
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Failed to save supplier.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,13 +68,25 @@ export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-neutral-300">NTN / CNIC</label>
+          <label className="text-sm font-semibold text-neutral-300">NTN / CNIC <span className="text-emerald-500">*</span></label>
           <input 
+            required
             type="text" 
             value={ntnCnic}
             onChange={e => setNtnCnic(e.target.value)}
             className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono"
             placeholder="e.g. 1234567-8"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-neutral-300">Contact No</label>
+          <input 
+            type="text" 
+            value={contactNo}
+            onChange={e => setContactNo(e.target.value)}
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+            placeholder="Phone number"
           />
         </div>
 
