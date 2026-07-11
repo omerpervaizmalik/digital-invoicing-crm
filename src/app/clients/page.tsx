@@ -12,6 +12,11 @@ export default async function ClientsPage() {
   const businessName = tenant?.businessName || 'Get Legal Solution';
   const canDelete = user?.role === 'SUPERVISOR' || user?.role === 'TENANT_ADMIN' || user?.role === 'ULTIMATE_ADMIN';
 
+  const businessCounts = clients.reduce((acc: Record<string, number>, c: any) => {
+    acc[c.buyerBusinessName] = (acc[c.buyerBusinessName] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
       
@@ -63,10 +68,15 @@ export default async function ClientsPage() {
                         <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center border border-neutral-700">
                           <Users className="w-4 h-4 text-neutral-400" />
                         </div>
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-white flex items-center flex-wrap gap-2">
                           {client.buyerBusinessName} 
+                          {businessCounts[client.buyerBusinessName] > 1 && (
+                            <span className="text-blue-400 font-normal text-[10px] uppercase tracking-wider border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 rounded-full" title="Total branches for this business">
+                              {businessCounts[client.buyerBusinessName]} Branches
+                            </span>
+                          )}
                           {client.branchName && client.branchName !== 'Main' && (
-                            <span className="text-emerald-500 font-normal ml-2 text-xs border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                            <span className="text-emerald-500 font-normal text-xs border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                               {client.branchName}
                             </span>
                           )}

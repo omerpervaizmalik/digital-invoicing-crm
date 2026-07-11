@@ -23,7 +23,7 @@ export default async function NewSupplierPage({ searchParams }: { searchParams: 
           <p className="text-neutral-400">Add a new vendor or supplier profile to your system.</p>
         </header>
 
-        {tenant ? <NewSupplierForm tenantId={tenant.id} initialData={cloneSupplier} /> : (
+        {tenant ? <NewSupplierForm key={cloneSupplier?.id || 'new'} tenantId={tenant.id} initialData={cloneSupplier} /> : (
           <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
             You must be logged in as a tenant or impersonating a tenant to add a supplier.
           </div>
