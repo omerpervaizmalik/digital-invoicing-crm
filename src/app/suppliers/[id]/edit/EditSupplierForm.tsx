@@ -22,7 +22,7 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
     setIsSubmitting(true);
     
     try {
-      await updateSupplier(supplier.id, {
+      const res = await updateSupplier(supplier.id, {
         sellerBusinessName: businessName,
         sellerNTNCNIC: ntnCnic,
         sellerProvince: province,
@@ -31,6 +31,12 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
         contactNo,
         branchName
       });
+      
+      if (res?.error) {
+        alert(res.error);
+        setIsSubmitting(false);
+        return;
+      }
       
       router.push('/suppliers');
       router.refresh();

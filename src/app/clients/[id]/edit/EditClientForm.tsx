@@ -25,7 +25,7 @@ export default function EditClientForm({ client }: { client: any }) {
     
     setIsLoading(true);
     try {
-      await updateClient(client.id, {
+      const res = await updateClient(client.id, {
         buyerBusinessName: name,
         buyerRegistrationType: type,
         buyerNTNCNIC: ntn,
@@ -34,6 +34,11 @@ export default function EditClientForm({ client }: { client: any }) {
         contactNo,
         branchName
       });
+      if (res?.error) {
+        alert(res.error);
+        setIsLoading(false);
+        return;
+      }
       router.push('/clients');
     } catch (err: any) {
       console.error(err);

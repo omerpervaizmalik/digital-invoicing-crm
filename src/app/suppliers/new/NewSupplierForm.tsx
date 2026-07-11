@@ -22,7 +22,7 @@ export default function NewSupplierForm({ tenantId, initialData }: { tenantId: s
     setIsSubmitting(true);
     
     try {
-      await createSupplier({
+      const res = await createSupplier({
         tenantId,
         sellerBusinessName: businessName,
         sellerNTNCNIC: ntnCnic,
@@ -32,6 +32,12 @@ export default function NewSupplierForm({ tenantId, initialData }: { tenantId: s
         contactNo,
         branchName
       });
+      
+      if (res?.error) {
+        alert(res.error);
+        setIsSubmitting(false);
+        return;
+      }
       
       router.push('/suppliers');
       router.refresh();

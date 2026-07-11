@@ -63,9 +63,9 @@ export async function createClient(data: any) {
       ]
     }
   });
-  if (existing) {
-    throw new Error("A Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
-  }
+    if (existing) {
+      return { error: "A Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name." };
+    }
 
   data.branchName = branchName;
   const client = await prisma.client.create({ data })
@@ -92,9 +92,9 @@ export async function updateClient(id: string, data: any) {
       ]
     }
   });
-  if (existing) {
-    throw new Error("Another Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
-  }
+    if (existing) {
+      return { error: "Another Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name." };
+    }
 
   data.branchName = branchName;
   const client = await prisma.client.update({ where: { id }, data })
@@ -140,7 +140,7 @@ export async function createSupplier(data: any) {
     }
   });
   if (existing) {
-    throw new Error("A Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
+    return { error: "A Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name." };
   }
 
   data.branchName = branchName;
@@ -168,9 +168,9 @@ export async function updateSupplier(id: string, data: any) {
       ]
     }
   });
-  if (existing) {
-    throw new Error("Another Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
-  }
+    if (existing) {
+      return { error: "Another Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name." };
+    }
 
   data.branchName = branchName;
   const supplier = await prisma.supplier.update({ where: { id }, data })

@@ -25,7 +25,7 @@ export default function NewClientForm({ tenantId, initialData }: { tenantId: str
     
     setIsLoading(true);
     try {
-      await createClient({
+      const res = await createClient({
         tenantId,
         buyerBusinessName: name,
         buyerRegistrationType: type,
@@ -35,6 +35,11 @@ export default function NewClientForm({ tenantId, initialData }: { tenantId: str
         contactNo,
         branchName
       });
+      if (res?.error) {
+        alert(res.error);
+        setIsLoading(false);
+        return;
+      }
       router.push('/clients');
     } catch (err: any) {
       console.error(err);
