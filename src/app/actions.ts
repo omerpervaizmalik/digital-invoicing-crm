@@ -436,3 +436,78 @@ export async function updateItem(id: string, data: any) {
   return item;
 }
 
+export async function loadPreviousMonthStock(tenantId: string, currentMonth: string) {
+  // Parse current month (YYYY-MM)
+  const [yearStr, monthStr] = currentMonth.split('-');
+  let year = parseInt(yearStr);
+  let month = parseInt(monthStr);
+
+  month -= 1;
+  if (month === 0) {
+    month = 12;
+    year -= 1;
+  }
+  const prevMonthStr = `${year}-${String(month).padStart(2, '0')}`;
+
+  const prevMonthData = await prisma.stockRegister.findMany({
+    where: { tenantId, monthYear: prevMonthStr }
+  });
+
+  if (prevMonthData.length === 0) {
+    return { success: false, error: 'No stock data found for previous month.' };
+  }
+
+  try {
+    for (const prevRow of prevMonthData) {
+      // Create or update current month entry
+      await prisma.stockRegister.upsert({
+        where: {
+          tenantId_itemCode_monthYear: {
+            tenantId,
+            itemCode: prevRow.itemCode,
+            monthYear: currentMonth
+          }
+        },
+        update: {
+          openingQty: prevRow.closingQty,
+          openingVal: prevRow.closingVal
+        },
+        create: {
+          tenantId,
+          itemCode: prevRow.itemCode,
+          hsCode: prevRow.hsCode,
+          uoM: prevRow.uoM,
+          salesTaxRate: prevRow.salesTaxRate,
+          monthYear: currentMonth,
+          openingQty: prevRow.closingQty,
+          openingVal: prevRow.closingVal
+        }
+      });
+
+      // Recalculate current month's closing
+      await recalculateClosingBalance(tenantId, prevRow.itemCode, currentMonth);
+    }
+    revalidatePath('/stock-register');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to load previous month data.' };
+  }
+}
+
+export async function updateStockOpeningBalance(stockId: number, qty: number, val: number) {
+  try {
+    const stock = await prisma.stockRegister.findUnique({ where: { id: stockId }});
+    if (!stock) return { success: false, error: 'Stock record not found' };
+
+    await prisma.stockRegister.update({
+      where: { id: stockId },
+      data: { openingQty: qty, openingVal: val }
+    });
+
+    await recalculateClosingBalance(stock.tenantId, stock.itemCode, stock.monthYear);
+    revalidatePath('/stock-register');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to update opening balance.' };
+  }
+}

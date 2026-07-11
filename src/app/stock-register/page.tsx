@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { Package, Download, Search } from 'lucide-react';
 import ExportButton from './ExportButton';
 import AddStockModal from './AddStockModal';
+import LoadPreviousMonthButton from './LoadPreviousMonthButton';
+import EditStockModal from './EditStockModal';
 
 const prisma = new PrismaClient();
 
@@ -61,6 +63,7 @@ export default async function StockRegisterPage({
               />
               <button type="submit" className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Filter</button>
             </form>
+            {tenant && <LoadPreviousMonthButton tenantId={tenant.id} currentMonth={currentMonth} />}
             {tenant && <AddStockModal tenantId={tenant.id} monthYear={currentMonth} />}
             <ExportButton data={stockData} month={currentMonth} />
           </div>
@@ -127,7 +130,12 @@ export default async function StockRegisterPage({
                       </td>
                       
                       {/* Opening */}
-                      <td className="px-4 py-3 border-r border-neutral-800 text-right font-mono text-emerald-500/70">{row.openingVal.toLocaleString()}</td>
+                      <td className="px-4 py-3 border-r border-neutral-800 text-right font-mono text-emerald-500/70">
+                        <div className="flex items-center justify-end">
+                          {row.openingVal.toLocaleString()}
+                          <EditStockModal stock={row} />
+                        </div>
+                      </td>
                       <td className="px-4 py-3 border-r border-neutral-800 text-right font-mono text-emerald-500/70">{row.openingQty}</td>
                       
                       {/* Purchased */}

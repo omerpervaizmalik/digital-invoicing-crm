@@ -25,7 +25,7 @@ export default function EditClientForm({ client }: { client: any }) {
     
     setIsLoading(true);
     try {
-      const res = await updateClient(client.id, {
+      const res: any = await updateClient(client.id, {
         buyerBusinessName: name,
         buyerRegistrationType: type,
         buyerNTNCNIC: ntn,

@@ -25,7 +25,7 @@ export default function NewClientForm({ tenantId, initialData }: { tenantId: str
     
     setIsLoading(true);
     try {
-      const res = await createClient({
+      const res: any = await createClient({
         tenantId,
         buyerBusinessName: name,
         buyerRegistrationType: type,

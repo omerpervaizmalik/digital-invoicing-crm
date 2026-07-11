@@ -22,7 +22,7 @@ export default function NewSupplierForm({ tenantId, initialData }: { tenantId: s
     setIsSubmitting(true);
     
     try {
-      const res = await createSupplier({
+      const res: any = await createSupplier({
         tenantId,
         sellerBusinessName: businessName,
         sellerNTNCNIC: ntnCnic,

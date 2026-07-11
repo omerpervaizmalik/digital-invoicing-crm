@@ -22,7 +22,7 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
     setIsSubmitting(true);
     
     try {
-      const res = await updateSupplier(supplier.id, {
+      const res: any = await updateSupplier(supplier.id, {
         sellerBusinessName: businessName,
         sellerNTNCNIC: ntnCnic,
         sellerProvince: province,
