@@ -15,6 +15,7 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
   const [address, setAddress] = useState(supplier.sellerAddress);
   const [registrationType, setRegistrationType] = useState(supplier.sellerRegistrationType);
   const [contactNo, setContactNo] = useState(supplier.contactNo || '');
+  const [branchName, setBranchName] = useState(supplier.branchName || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +28,8 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
         sellerProvince: province,
         sellerAddress: address,
         sellerRegistrationType: registrationType,
-        contactNo
+        contactNo,
+        branchName
       });
       
       router.push('/suppliers');
@@ -82,6 +84,16 @@ export default function EditSupplierForm({ supplier }: { supplier: any }) {
             type="text" 
             value={contactNo}
             onChange={e => setContactNo(e.target.value)}
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-neutral-300">Branch Name (Optional)</label>
+          <input 
+            type="text" 
+            value={branchName}
+            onChange={e => setBranchName(e.target.value)}
             className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>

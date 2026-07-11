@@ -43,9 +43,11 @@ export async function getClients(tenantId: string) {
 }
 
 export async function createClient(data: any) {
+  const branchName = data.branchName || "Main";
   const existing = await prisma.client.findFirst({
     where: {
       tenantId: data.tenantId,
+      branchName: branchName,
       OR: [
         { buyerBusinessName: data.buyerBusinessName },
         ...(data.buyerNTNCNIC ? [{ buyerNTNCNIC: data.buyerNTNCNIC }] : [])
@@ -53,9 +55,10 @@ export async function createClient(data: any) {
     }
   });
   if (existing) {
-    throw new Error("A Client with this Business Name or NTN/CNIC already exists.");
+    throw new Error("A Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
   }
 
+  data.branchName = branchName;
   const client = await prisma.client.create({ data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {
@@ -70,9 +73,11 @@ export async function getSuppliers(tenantId: string) {
 }
 
 export async function createSupplier(data: any) {
+  const branchName = data.branchName || "Main";
   const existing = await prisma.supplier.findFirst({
     where: {
       tenantId: data.tenantId,
+      branchName: branchName,
       OR: [
         { sellerBusinessName: data.sellerBusinessName },
         ...(data.sellerNTNCNIC ? [{ sellerNTNCNIC: data.sellerNTNCNIC }] : [])
@@ -80,9 +85,10 @@ export async function createSupplier(data: any) {
     }
   });
   if (existing) {
-    throw new Error("A Supplier with this Business Name or NTN/CNIC already exists.");
+    throw new Error("A Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
   }
 
+  data.branchName = branchName;
   const supplier = await prisma.supplier.create({ data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {
@@ -95,10 +101,12 @@ export async function updateSupplier(id: string, data: any) {
   const currentSupplier = await prisma.supplier.findUnique({ where: { id } });
   if (!currentSupplier) throw new Error("Supplier not found");
 
+  const branchName = data.branchName || "Main";
   const existing = await prisma.supplier.findFirst({
     where: {
       tenantId: currentSupplier.tenantId,
       id: { not: id },
+      branchName: branchName,
       OR: [
         { sellerBusinessName: data.sellerBusinessName },
         ...(data.sellerNTNCNIC ? [{ sellerNTNCNIC: data.sellerNTNCNIC }] : [])
@@ -106,9 +114,10 @@ export async function updateSupplier(id: string, data: any) {
     }
   });
   if (existing) {
-    throw new Error("Another Supplier with this Business Name or NTN/CNIC already exists.");
+    throw new Error("Another Supplier with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
   }
 
+  data.branchName = branchName;
   const supplier = await prisma.supplier.update({ where: { id }, data })
   const user = await getCurrentUser()
   if (user && user.tenantId) {

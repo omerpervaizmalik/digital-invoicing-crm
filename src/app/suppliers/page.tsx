@@ -59,7 +59,14 @@ export default async function SuppliersPage() {
                         <div className="h-8 w-8 rounded-full bg-neutral-800 flex items-center justify-center border border-neutral-700">
                           <Factory className="w-4 h-4 text-neutral-400" />
                         </div>
-                        <span className="font-semibold text-white">{supplier.sellerBusinessName}</span>
+                        <span className="font-semibold text-white">
+                          {supplier.sellerBusinessName}
+                          {supplier.branchName && supplier.branchName !== 'Main' && (
+                            <span className="text-emerald-500 font-normal ml-2 text-xs border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                              {supplier.branchName}
+                            </span>
+                          )}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-4 font-mono text-emerald-500">{supplier.sellerNTNCNIC || 'N/A'}</td>

@@ -15,6 +15,7 @@ export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
   const [address, setAddress] = useState('');
   const [registrationType, setRegistrationType] = useState('Registered');
   const [contactNo, setContactNo] = useState('');
+  const [branchName, setBranchName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +29,8 @@ export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
         sellerProvince: province,
         sellerAddress: address,
         sellerRegistrationType: registrationType,
-        contactNo
+        contactNo,
+        branchName
       });
       
       router.push('/suppliers');
@@ -87,6 +89,17 @@ export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
             onChange={e => setContactNo(e.target.value)}
             className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
             placeholder="Phone number"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-neutral-300">Branch Name (Optional)</label>
+          <input 
+            type="text" 
+            value={branchName}
+            onChange={e => setBranchName(e.target.value)}
+            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+            placeholder="e.g. Main, Warehouse"
           />
         </div>
 

@@ -79,6 +79,7 @@ model Supplier {
   sellerAddress         String
   sellerRegistrationType String     // "Registered" | "Unregistered"
   contactNo             String?
+  branchName            String?     @default("Main")
   
   invoices              Invoice[]
   
@@ -97,6 +98,7 @@ model Client {
   buyerAddress          String
   buyerRegistrationType String      // "Registered" | "Unregistered"
   contactNo             String?
+  branchName            String?     @default("Main")
   
   invoices              Invoice[]
   

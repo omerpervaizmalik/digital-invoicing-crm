@@ -13,6 +13,7 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
   const [province, setProvince] = useState('Punjab');
   const [address, setAddress] = useState('');
   const [contactNo, setContactNo] = useState('');
+  const [branchName, setBranchName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +32,8 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
         buyerNTNCNIC: ntn,
         buyerProvince: province,
         buyerAddress: address,
-        contactNo
+        contactNo,
+        branchName
       });
       router.push('/clients');
     } catch (err: any) {
@@ -94,6 +96,17 @@ export default function NewClientForm({ tenantId }: { tenantId: string }) {
               onChange={e => setContactNo(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors" 
               placeholder="Phone number" 
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-300">Branch Name (Optional)</label>
+            <input 
+              type="text" 
+              value={branchName}
+              onChange={e => setBranchName(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors" 
+              placeholder="e.g. Main, Karachi Branch" 
             />
           </div>
 
