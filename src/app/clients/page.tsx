@@ -84,7 +84,7 @@ export default async function ClientsPage() {
                       )}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <button className="text-emerald-500 font-medium hover:underline">Edit</button>
+                      <Link href={`/clients/${client.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
                     </td>
                   </tr>
                 ))}

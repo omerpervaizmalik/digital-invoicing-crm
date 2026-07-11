@@ -39,7 +39,16 @@ export async function getCurrentUser() {
 
 // CLIENT ACTIONS
 export async function getClients(tenantId: string) {
-  return await prisma.client.findMany({ where: { tenantId } })
+  return prisma.client.findMany({
+    where: { tenantId },
+    orderBy: { buyerBusinessName: 'asc' }
+  })
+}
+
+export async function getClient(id: string) {
+  return prisma.client.findUnique({
+    where: { id }
+  })
 }
 
 export async function createClient(data: any) {
@@ -65,6 +74,36 @@ export async function createClient(data: any) {
     await logActivity(user.tenantId, user.id, 'CREATE', 'CLIENT', `Created client: ${client.buyerBusinessName}`)
   }
   revalidatePath('/clients')
+}
+
+export async function updateClient(id: string, data: any) {
+  const currentClient = await prisma.client.findUnique({ where: { id } });
+  if (!currentClient) throw new Error("Client not found");
+
+  const branchName = data.branchName || "Main";
+  const existing = await prisma.client.findFirst({
+    where: {
+      tenantId: currentClient.tenantId,
+      id: { not: id },
+      branchName: branchName,
+      OR: [
+        { buyerBusinessName: data.buyerBusinessName },
+        ...(data.buyerNTNCNIC ? [{ buyerNTNCNIC: data.buyerNTNCNIC }] : [])
+      ]
+    }
+  });
+  if (existing) {
+    throw new Error("Another Client with this Business Name or NTN/CNIC already exists for this branch. Please use a different Branch Name.");
+  }
+
+  data.branchName = branchName;
+  const client = await prisma.client.update({ where: { id }, data })
+  const user = await getCurrentUser()
+  if (user && user.tenantId) {
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'CLIENT', `Updated client: ${client.buyerBusinessName}`)
+  }
+  revalidatePath('/clients')
+  return client
 }
 
 // SUPPLIER ACTIONS
