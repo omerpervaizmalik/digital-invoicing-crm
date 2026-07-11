@@ -1,12 +1,16 @@
 import React from 'react';
 import { Users, Plus, Search, CheckCircle, AlertCircle, ShieldCheck, Factory } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentTenant, getSuppliers } from '../actions';
+import { getCurrentTenant, getSuppliers, getCurrentUser } from '../actions';
+import DeleteSupplierButton from './DeleteSupplierButton';
+import { CopyPlus } from 'lucide-react';
 
 export default async function SuppliersPage() {
   const tenant = await getCurrentTenant();
   const suppliers = tenant ? await getSuppliers(tenant.id) : [];
+  const user = await getCurrentUser();
   const businessName = tenant?.businessName || 'Get Legal Solution';
+  const canDelete = user?.role === 'SUPERVISOR' || user?.role === 'TENANT_ADMIN' || user?.role === 'ULTIMATE_ADMIN';
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
@@ -84,7 +88,13 @@ export default async function SuppliersPage() {
                       )}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <Link href={`/suppliers/${supplier.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link href={`/suppliers/new?clone=${supplier.id}`} className="text-blue-500 font-medium hover:underline flex items-center" title="Add Branch">
+                          <CopyPlus className="w-4 h-4" />
+                        </Link>
+                        <Link href={`/suppliers/${supplier.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
+                        {canDelete && <DeleteSupplierButton supplierId={supplier.id} />}
+                      </div>
                     </td>
                   </tr>
                 ))}

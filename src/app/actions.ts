@@ -111,6 +111,22 @@ export async function getSuppliers(tenantId: string) {
   return await prisma.supplier.findMany({ where: { tenantId } })
 }
 
+export async function getSupplier(id: string) {
+  return await prisma.supplier.findUnique({ where: { id } })
+}
+
+export async function deleteClient(id: string) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== 'SUPERVISOR' && user.role !== 'TENANT_ADMIN' && user.role !== 'ULTIMATE_ADMIN')) {
+    throw new Error("Unauthorized to delete clients");
+  }
+  const client = await prisma.client.findUnique({ where: { id } });
+  if (!client || client.tenantId !== user.tenantId) {
+    throw new Error("Client not found or unauthorized");
+  }
+  return await prisma.client.delete({ where: { id } });
+}
+
 export async function createSupplier(data: any) {
   const branchName = data.branchName || "Main";
   const existing = await prisma.supplier.findFirst({
@@ -207,7 +223,20 @@ export async function createItem(data: any) {
   revalidatePath('/items');
 }
 
-// INVOICE ACTIONS
+export async function deleteSupplier(id: string) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== 'SUPERVISOR' && user.role !== 'TENANT_ADMIN' && user.role !== 'ULTIMATE_ADMIN')) {
+    throw new Error("Unauthorized to delete suppliers");
+  }
+  const supplier = await prisma.supplier.findUnique({ where: { id } });
+  if (!supplier || supplier.tenantId !== user.tenantId) {
+    throw new Error("Supplier not found or unauthorized");
+  }
+  return await prisma.supplier.delete({ where: { id } });
+}
+
+// -------------------------------------------------------------------------------------------------
+// VOUCHERS / INVOICES ACTIONS
 export async function getInvoices(tenantId: string) {
   return await prisma.invoice.findMany({ 
     where: { tenantId },

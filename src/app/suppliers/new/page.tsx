@@ -1,11 +1,12 @@
 import React from 'react';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentTenant } from '../../actions';
+import { getCurrentTenant, getSupplier } from '../../actions';
 import NewSupplierForm from './NewSupplierForm';
 
-export default async function NewSupplierPage() {
+export default async function NewSupplierPage({ searchParams }: { searchParams: { clone?: string } }) {
   const tenant = await getCurrentTenant();
+  const cloneSupplier = searchParams?.clone ? await getSupplier(searchParams.clone) : null;
   const businessName = tenant?.businessName || 'Get Legal Solution';
 
   return (
@@ -16,11 +17,12 @@ export default async function NewSupplierPage() {
         <Link href="/suppliers" className="inline-flex items-center gap-2 text-neutral-400 hover:text-emerald-400 transition-colors mb-8 font-medium">
           <ArrowLeft className="w-4 h-4" /> Back to Suppliers
         </Link>
-        <div className="mb-8">
+        <header className="mb-8">
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Register New Supplier</h1>
           <p className="text-neutral-400">Add a new vendor or supplier profile to your system.</p>
-        </div>
-        {tenant ? <NewSupplierForm tenantId={tenant.id} /> : (
+        </header>
+
+        {tenant ? <NewSupplierForm tenantId={tenant.id} initialData={cloneSupplier} /> : (
           <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
             You must be logged in as a tenant or impersonating a tenant to add a supplier.
           </div>

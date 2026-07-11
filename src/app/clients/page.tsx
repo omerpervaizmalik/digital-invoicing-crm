@@ -1,12 +1,16 @@
 import React from 'react';
 import { Users, Plus, Search, CheckCircle, AlertCircle, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentTenant, getClients } from '../actions';
+import { getCurrentTenant, getClients, getCurrentUser } from '../actions';
+import DeleteClientButton from './DeleteClientButton';
+import { CopyPlus } from 'lucide-react';
 
 export default async function ClientsPage() {
   const tenant = await getCurrentTenant();
   const clients = tenant ? await getClients(tenant.id) : [];
+  const user = await getCurrentUser();
   const businessName = tenant?.businessName || 'Get Legal Solution';
+  const canDelete = user?.role === 'SUPERVISOR' || user?.role === 'TENANT_ADMIN' || user?.role === 'ULTIMATE_ADMIN';
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans">
@@ -84,7 +88,13 @@ export default async function ClientsPage() {
                       )}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <Link href={`/clients/${client.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link href={`/clients/new?clone=${client.id}`} className="text-blue-500 font-medium hover:underline flex items-center" title="Add Branch">
+                          <CopyPlus className="w-4 h-4" />
+                        </Link>
+                        <Link href={`/clients/${client.id}/edit`} className="text-emerald-500 font-medium hover:underline">Edit</Link>
+                        {canDelete && <DeleteClientButton clientId={client.id} />}
+                      </div>
                     </td>
                   </tr>
                 ))}

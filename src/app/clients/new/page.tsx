@@ -1,11 +1,12 @@
 import React from 'react';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { getCurrentTenant } from '../../actions';
+import { getCurrentTenant, getClient } from '../../actions';
 import NewClientForm from './NewClientForm';
 
-export default async function NewClientPage() {
+export default async function NewClientPage({ searchParams }: { searchParams: { clone?: string } }) {
   const tenant = await getCurrentTenant();
+  const cloneClient = searchParams?.clone ? await getClient(searchParams.clone) : null;
   const businessName = tenant?.businessName || 'Get Legal Solution';
 
   return (
@@ -22,7 +23,7 @@ export default async function NewClientPage() {
           <p className="text-neutral-400">Register a new buyer profile compliant with FBR standards.</p>
         </header>
 
-        {tenant ? <NewClientForm tenantId={tenant.id} /> : (
+        {tenant ? <NewClientForm tenantId={tenant.id} initialData={cloneClient} /> : (
           <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400">
             You must be logged in as a tenant or impersonating a tenant to add a client.
           </div>

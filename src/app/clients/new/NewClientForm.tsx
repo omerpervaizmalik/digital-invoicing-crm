@@ -5,14 +5,14 @@ import { Building2, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../../actions';
 
-export default function NewClientForm({ tenantId }: { tenantId: string }) {
+export default function NewClientForm({ tenantId, initialData }: { tenantId: string, initialData?: any }) {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [type, setType] = useState('Registered');
-  const [ntn, setNtn] = useState('');
-  const [province, setProvince] = useState('Punjab');
+  const [name, setName] = useState(initialData?.buyerBusinessName || '');
+  const [type, setType] = useState(initialData?.buyerRegistrationType || 'Registered');
+  const [ntn, setNtn] = useState(initialData?.buyerNTNCNIC || '');
+  const [province, setProvince] = useState(initialData?.buyerProvince || 'Punjab');
   const [address, setAddress] = useState('');
-  const [contactNo, setContactNo] = useState('');
+  const [contactNo, setContactNo] = useState(initialData?.contactNo || '');
   const [branchName, setBranchName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

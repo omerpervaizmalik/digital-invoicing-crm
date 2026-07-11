@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation';
 import { createSupplier } from '../../actions';
 import { Building2, Save } from 'lucide-react';
 
-export default function NewSupplierForm({ tenantId }: { tenantId: string }) {
+export default function NewSupplierForm({ tenantId, initialData }: { tenantId: string, initialData?: any }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [businessName, setBusinessName] = useState('');
-  const [ntnCnic, setNtnCnic] = useState('');
-  const [province, setProvince] = useState('Punjab');
+  const [businessName, setBusinessName] = useState(initialData?.sellerBusinessName || '');
+  const [ntnCnic, setNtnCnic] = useState(initialData?.sellerNTNCNIC || '');
+  const [province, setProvince] = useState(initialData?.sellerProvince || 'Punjab');
   const [address, setAddress] = useState('');
-  const [registrationType, setRegistrationType] = useState('Registered');
-  const [contactNo, setContactNo] = useState('');
+  const [registrationType, setRegistrationType] = useState(initialData?.sellerRegistrationType || 'Registered');
+  const [contactNo, setContactNo] = useState(initialData?.contactNo || '');
   const [branchName, setBranchName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {

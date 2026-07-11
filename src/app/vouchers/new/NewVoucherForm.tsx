@@ -10,6 +10,7 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
   const [invoiceCategory, setInvoiceCategory] = useState<'Sale' | 'Purchase'>('Sale');
   const [clientId, setClientId] = useState('');
   const [supplierId, setSupplierId] = useState('');
+  const [selectedBusinessName, setSelectedBusinessName] = useState('');
   const [invoiceType, setInvoiceType] = useState('Sale Invoice');
   const [invoiceDate, setInvoiceDate] = useState('');
   const [referenceNo, setReferenceNo] = useState('');
@@ -199,6 +200,9 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
               <select value={invoiceCategory} onChange={e => {
                 setInvoiceCategory(e.target.value as 'Sale' | 'Purchase');
                 setInvoiceType(e.target.value === 'Purchase' ? 'Purchase Invoice' : 'Sale Invoice');
+                setSelectedBusinessName('');
+                setClientId('');
+                setSupplierId('');
               }} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none">
                 <option value="Sale">Sale (Outflow)</option>
                 <option value="Purchase">Purchase (Inflow)</option>
@@ -206,19 +210,44 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-300">{invoiceCategory === 'Sale' ? 'Client / Buyer *' : 'Supplier / Vendor *'}</label>
+              <label className="text-sm font-medium text-neutral-300">{invoiceCategory === 'Sale' ? 'Company Name *' : 'Company Name *'}</label>
               {invoiceCategory === 'Sale' ? (
-                <select value={clientId} onChange={e => setClientId(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none">
-                  <option value="">Select a registered client...</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.buyerBusinessName} ({c.buyerRegistrationType})</option>
+                <select value={selectedBusinessName} onChange={e => {
+                  setSelectedBusinessName(e.target.value);
+                  setClientId('');
+                }} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none">
+                  <option value="">Select a company...</option>
+                  {Array.from(new Set(clients.map(c => c.buyerBusinessName))).map(name => (
+                    <option key={name} value={name}>{name}</option>
                   ))}
                 </select>
               ) : (
-                <select value={supplierId} onChange={e => setSupplierId(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none">
-                  <option value="">Select a registered supplier...</option>
-                  {suppliers.map(s => (
-                    <option key={s.id} value={s.id}>{s.sellerBusinessName} ({s.sellerRegistrationType})</option>
+                <select value={selectedBusinessName} onChange={e => {
+                  setSelectedBusinessName(e.target.value);
+                  setSupplierId('');
+                }} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none">
+                  <option value="">Select a company...</option>
+                  {Array.from(new Set(suppliers.map(s => s.sellerBusinessName))).map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-300">Select Branch *</label>
+              {invoiceCategory === 'Sale' ? (
+                <select value={clientId} onChange={e => setClientId(e.target.value)} disabled={!selectedBusinessName} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none disabled:opacity-50">
+                  <option value="">Select a branch...</option>
+                  {clients.filter(c => c.buyerBusinessName === selectedBusinessName).map(c => (
+                    <option key={c.id} value={c.id}>{c.branchName || 'Main'} - {c.buyerAddress}</option>
+                  ))}
+                </select>
+              ) : (
+                <select value={supplierId} onChange={e => setSupplierId(e.target.value)} disabled={!selectedBusinessName} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none disabled:opacity-50">
+                  <option value="">Select a branch...</option>
+                  {suppliers.filter(s => s.sellerBusinessName === selectedBusinessName).map(s => (
+                    <option key={s.id} value={s.id}>{s.branchName || 'Main'} - {s.sellerAddress}</option>
                   ))}
                 </select>
               )}
