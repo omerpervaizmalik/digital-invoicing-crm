@@ -7,10 +7,11 @@ import EditSupplierForm from './EditSupplierForm';
 
 const prisma = new PrismaClient();
 
-export default async function EditSupplierPage({ params }: { params: { id: string } }) {
+export default async function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
   const tenant = await getCurrentTenant();
   const businessName = tenant?.businessName || 'Get Legal Solution';
-  const supplierId = params.id;
+  const resolvedParams = await params;
+  const supplierId = resolvedParams.id;
   
   const supplier = await prisma.supplier.findUnique({ where: { id: supplierId } });
 

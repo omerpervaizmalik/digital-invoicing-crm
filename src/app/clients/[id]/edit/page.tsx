@@ -3,8 +3,9 @@ import EditClientForm from './EditClientForm';
 import { getClient } from '../../../actions';
 import { redirect } from 'next/navigation';
 
-export default async function EditClientPage({ params }: { params: { id: string } }) {
-  const client = await getClient(params.id);
+export default async function EditClientPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const client = await getClient(resolvedParams.id);
   
   if (!client) {
     redirect('/clients');

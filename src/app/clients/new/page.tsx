@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { getCurrentTenant, getClient } from '../../actions';
 import NewClientForm from './NewClientForm';
 
-export default async function NewClientPage({ searchParams }: { searchParams: { clone?: string } }) {
+export default async function NewClientPage({ searchParams }: { searchParams: Promise<{ clone?: string }> }) {
   const tenant = await getCurrentTenant();
-  const cloneClient = searchParams?.clone ? await getClient(searchParams.clone) : null;
+  const resolvedParams = await searchParams;
+  const cloneClient = resolvedParams?.clone ? await getClient(resolvedParams.clone) : null;
   const businessName = tenant?.businessName || 'Get Legal Solution';
 
   return (
