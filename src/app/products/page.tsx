@@ -2,6 +2,7 @@ import React from 'react';
 import { Package, Plus, Search, Tag, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { getCurrentTenant, getItems } from '../actions';
+import ImportExportButtons from './ImportExportButtons';
 
 export default async function ItemsPage() {
   const tenant = await getCurrentTenant();
@@ -13,15 +14,18 @@ export default async function ItemsPage() {
       
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight mb-2">Product Catalog</h1>
             <p className="text-neutral-400">Manage products linked to official FBR HS Codes and Tax Rates.</p>
           </div>
-          <Link href="/products/new" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-2.5 rounded-xl font-bold transition-all transform active:scale-[0.98]">
-            <Plus className="w-5 h-5" />
-            Add New Product
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {tenant && <ImportExportButtons items={items} />}
+            <Link href="/products/new" className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-2.5 rounded-xl font-bold transition-all transform active:scale-[0.98]">
+              <Plus className="w-5 h-5" />
+              Add New Product
+            </Link>
+          </div>
         </header>
 
         <div className="p-6 rounded-2xl bg-neutral-900 border border-neutral-800">

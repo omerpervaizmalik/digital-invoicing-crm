@@ -511,3 +511,138 @@ export async function updateStockOpeningBalance(stockId: number, qty: number, va
     return { success: false, error: err.message || 'Failed to update opening balance.' };
   }
 }
+
+export async function bulkUploadItems(items: any[]) {
+  const tenant = await getCurrentTenant();
+  if (!tenant) throw new Error("Unauthorized: No active tenant session.");
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const results = {
+    created: 0,
+    updated: 0,
+    errors: [] as string[]
+  };
+
+  const monthYear = new Date().toISOString().slice(0, 7);
+
+  for (const itemData of items) {
+    try {
+      const {
+        itemCode,
+        hsCode,
+        productDescription,
+        rate,
+        uoM,
+        unitPrice,
+        fixedNotifiedValueOrRetailPrice,
+        saleType,
+        sroScheduleNo,
+        sroItemSerialNo,
+        petroleumLevyOn,
+        initialStock,
+        initialStockValue
+      } = itemData;
+
+      if (!itemCode || !hsCode || !productDescription) {
+        results.errors.push(`Skipped row with missing code, description, or HS code.`);
+        continue;
+      }
+
+      const existing = await prisma.item.findUnique({
+        where: {
+          tenantId_itemCode: {
+            tenantId: tenant.id,
+            itemCode: itemCode.trim().toUpperCase()
+          }
+        }
+      });
+
+      const parsedUnitPrice = parseFloat(unitPrice) || 0;
+      const parsedRetailPrice = parseFloat(fixedNotifiedValueOrRetailPrice) || 0;
+      const parsedInitialStock = parseFloat(initialStock) || 0;
+      const parsedInitialStockValue = parseFloat(initialStockValue) || 0;
+      
+      const payload = {
+        hsCode: String(hsCode).trim(),
+        productDescription: String(productDescription).trim(),
+        rate: String(rate).trim(),
+        uoM: String(uoM).trim(),
+        unitPrice: parsedUnitPrice,
+        fixedNotifiedValueOrRetailPrice: parsedRetailPrice,
+        saleType: String(saleType || "Goods at standard rate (default)").trim(),
+        sroScheduleNo: sroScheduleNo ? String(sroScheduleNo).trim() : null,
+        sroItemSerialNo: sroItemSerialNo ? String(sroItemSerialNo).trim() : null,
+        petroleumLevyOn: petroleumLevyOn ? String(petroleumLevyOn).trim() : null,
+      };
+
+      let dbItem;
+      if (existing) {
+        dbItem = await prisma.item.update({
+          where: { id: existing.id },
+          data: payload
+        });
+        results.updated++;
+      } else {
+        dbItem = await prisma.item.create({
+          data: {
+            ...payload,
+            itemCode: itemCode.trim().toUpperCase(),
+            tenantId: tenant.id
+          }
+        });
+        results.created++;
+      }
+
+      // Handle stock register opening balance for this month if initial stock is provided
+      if (parsedInitialStock > 0 || parsedInitialStockValue > 0) {
+        const existingStock = await prisma.stockRegister.findUnique({
+          where: {
+            tenantId_itemCode_monthYear: {
+              tenantId: tenant.id,
+              itemCode: dbItem.itemCode,
+              monthYear
+            }
+          }
+        });
+
+        if (existingStock) {
+          await prisma.stockRegister.update({
+            where: { id: existingStock.id },
+            data: {
+              openingQty: parsedInitialStock,
+              openingVal: parsedInitialStockValue
+            }
+          });
+          await recalculateClosingBalance(tenant.id, dbItem.itemCode, monthYear);
+        } else {
+          await addManualStock({
+            tenantId: tenant.id,
+            itemCode: dbItem.itemCode,
+            monthYear,
+            hsCode: dbItem.hsCode,
+            uoM: dbItem.uoM,
+            salesTaxRate: dbItem.rate,
+            val: parsedInitialStockValue,
+            qty: parsedInitialStock,
+            type: 'opening'
+          });
+        }
+      }
+
+    } catch (err: any) {
+      console.error("Bulk upload item error:", err);
+      results.errors.push(`Error saving product ${itemData.itemCode || 'Unknown'}: ${err.message || err}`);
+    }
+  }
+
+  if (results.created > 0 || results.updated > 0) {
+    await logActivity(tenant.id, user.id, 'CREATE', 'ITEM', `Bulk uploaded products: Created ${results.created}, Updated ${results.updated}`);
+  }
+
+  revalidatePath('/products');
+  revalidatePath('/items');
+  revalidatePath('/stock-register');
+  
+  return results;
+}
