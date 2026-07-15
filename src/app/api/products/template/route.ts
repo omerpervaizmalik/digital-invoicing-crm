@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
     const petroleumLevyOn = fbrData.petroleumLevyOn || [];
     const sros = fbrData.sros || [];
     const itemSrNos = fbrData.itemSrNos || [];
+    const hsCodesList = (fbrData.hsCodes || []).map((h: any) => 
+      h.description && h.description !== '-' ? `${h.code} - ${h.description}` : h.code
+    );
 
     // 2. Create Excel Workbook
     const workbook = new ExcelJS.Workbook();
@@ -30,6 +33,7 @@ export async function GET(req: NextRequest) {
     listSheet.getCell('D1').value = 'PetroleumLevyOn';
     listSheet.getCell('E1').value = 'SROs';
     listSheet.getCell('F1').value = 'ItemSrNos';
+    listSheet.getCell('G1').value = 'HSCodes';
 
     const maxLength = Math.max(
       rates.length,
@@ -37,7 +41,8 @@ export async function GET(req: NextRequest) {
       saleTypes.length,
       petroleumLevyOn.length,
       sros.length,
-      itemSrNos.length
+      itemSrNos.length,
+      hsCodesList.length
     );
 
     for (let i = 0; i < maxLength; i++) {
@@ -48,6 +53,7 @@ export async function GET(req: NextRequest) {
       if (i < petroleumLevyOn.length) listSheet.getCell(`D${rowNum}`).value = petroleumLevyOn[i];
       if (i < sros.length) listSheet.getCell(`E${rowNum}`).value = sros[i];
       if (i < itemSrNos.length) listSheet.getCell(`F${rowNum}`).value = itemSrNos[i];
+      if (i < hsCodesList.length) listSheet.getCell(`G${rowNum}`).value = hsCodesList[i];
     }
 
     // Format Rates column on lists sheet as percent
@@ -164,6 +170,15 @@ export async function GET(req: NextRequest) {
       error: 'Please select a rate from the dropdown list.'
     };
 
+    const hsCodeValidation = {
+      type: 'list' as const,
+      allowBlank: true,
+      formulae: [`Lists!$G$2:$G$${hsCodesList.length + 1}`],
+      showErrorMessage: false, // Allows searchable typing in modern Excel
+      errorTitle: 'Invalid HS Code',
+      error: 'Please select a valid HS Code from the list.'
+    };
+
     const uomValidation = {
       type: 'list' as const,
       allowBlank: true,
@@ -231,6 +246,7 @@ export async function GET(req: NextRequest) {
       c3.alignment = { vertical: 'middle', horizontal: 'center' };
       c3.border = thinBorder;
       c3.font = { name: 'Segoe UI', size: 10, bold: true };
+      c3.dataValidation = hsCodeValidation;
 
       // Sales Tax Rate
       const c4 = row.getCell(4);

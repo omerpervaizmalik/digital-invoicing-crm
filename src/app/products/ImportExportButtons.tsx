@@ -59,7 +59,10 @@ export default function ImportExportButtons({ items }: ImportExportButtonsProps)
 
           const itemCode = String(getValue(['Product Code', 'itemCode', 'code']) || '').trim();
           const productDescription = String(getValue(['Product Description', 'productDescription', 'description', 'desc']) || '').trim();
-          const hsCode = String(getValue(['HS Code', 'hsCode', 'hscode']) || '').trim();
+          let hsCode = String(getValue(['HS Code', 'hsCode', 'hscode']) || '').trim();
+          if (hsCode.includes(' - ')) {
+            hsCode = hsCode.split(' - ')[0].trim();
+          }
           
           let rateVal = String(getValue(['Sales Tax Rate', 'rate', 'salesTaxRate', 'taxRate']) || '0.18').trim();
           // Convert percentage string or integers to decimals (e.g. 18% or 18 -> 0.18)
