@@ -164,7 +164,7 @@ export async function GET(req: NextRequest) {
     const rateValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$A$2:$A$${rates.length + 1}`],
+      formulae: [`'Lists'!$A$2:$A$${rates.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid Rate',
       error: 'Please select a rate from the dropdown list.'
@@ -173,8 +173,8 @@ export async function GET(req: NextRequest) {
     const hsCodeValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$G$2:$G$${hsCodesList.length + 1}`],
-      showErrorMessage: false, // Allows searchable typing in modern Excel
+      formulae: [`'Lists'!$G$2:$G$${hsCodesList.length + 1}`],
+      showErrorMessage: false, // Disabling popup makes it searchable and typeable in Excel
       errorTitle: 'Invalid HS Code',
       error: 'Please select a valid HS Code from the list.'
     };
@@ -182,7 +182,7 @@ export async function GET(req: NextRequest) {
     const uomValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$B$2:$B$${uoms.length + 1}`],
+      formulae: [`'Lists'!$B$2:$B$${uoms.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid UOM',
       error: 'Please select a unit of measure from the dropdown list.'
@@ -191,7 +191,7 @@ export async function GET(req: NextRequest) {
     const saleTypeValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$C$2:$C$${saleTypes.length + 1}`],
+      formulae: [`'Lists'!$C$2:$C$${saleTypes.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid Sale Type',
       error: 'Please select a sale type from the dropdown list.'
@@ -200,7 +200,7 @@ export async function GET(req: NextRequest) {
     const sroValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$E$2:$E$${sros.length + 1}`],
+      formulae: [`'Lists'!$E$2:$E$${sros.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid SRO',
       error: 'Please select an SRO Schedule No from the dropdown list.'
@@ -209,7 +209,7 @@ export async function GET(req: NextRequest) {
     const serialValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$F$2:$F$${itemSrNos.length + 1}`],
+      formulae: [`'Lists'!$F$2:$F$${itemSrNos.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid Serial No',
       error: 'Please select a serial number from the dropdown list.'
@@ -218,7 +218,7 @@ export async function GET(req: NextRequest) {
     const levyValidation = {
       type: 'list' as const,
       allowBlank: true,
-      formulae: [`Lists!$D$2:$D$${petroleumLevyOn.length + 1}`],
+      formulae: [`'Lists'!$D$2:$D$${petroleumLevyOn.length + 1}`],
       showErrorMessage: true,
       errorTitle: 'Invalid Petroleum Levy',
       error: 'Please select a petroleum levy option from the dropdown list.'
@@ -246,7 +246,6 @@ export async function GET(req: NextRequest) {
       c3.alignment = { vertical: 'middle', horizontal: 'center' };
       c3.border = thinBorder;
       c3.font = { name: 'Segoe UI', size: 10, bold: true };
-      c3.dataValidation = hsCodeValidation;
 
       // Sales Tax Rate
       const c4 = row.getCell(4);
@@ -254,14 +253,12 @@ export async function GET(req: NextRequest) {
       c4.alignment = { vertical: 'middle', horizontal: 'center' };
       c4.border = thinBorder;
       c4.font = { name: 'Segoe UI', size: 10 };
-      c4.dataValidation = rateValidation;
 
       // UOM
       const c5 = row.getCell(5);
       c5.alignment = { vertical: 'middle', horizontal: 'left' };
       c5.border = thinBorder;
       c5.font = { name: 'Segoe UI', size: 10 };
-      c5.dataValidation = uomValidation;
 
       // Unit Price
       const c6 = row.getCell(6);
@@ -296,29 +293,35 @@ export async function GET(req: NextRequest) {
       c10.alignment = { vertical: 'middle', horizontal: 'left' };
       c10.border = thinBorder;
       c10.font = { name: 'Segoe UI', size: 10 };
-      c10.dataValidation = saleTypeValidation;
 
       // SRO Schedule No
       const c11 = row.getCell(11);
       c11.alignment = { vertical: 'middle', horizontal: 'left' };
       c11.border = thinBorder;
       c11.font = { name: 'Segoe UI', size: 10 };
-      c11.dataValidation = sroValidation;
 
       // SRO Item Serial No
       const c12 = row.getCell(12);
       c12.alignment = { vertical: 'middle', horizontal: 'left' };
       c12.border = thinBorder;
       c12.font = { name: 'Segoe UI', size: 10 };
-      c12.dataValidation = serialValidation;
 
       // Petroleum Levy On
       const c13 = row.getCell(13);
       c13.alignment = { vertical: 'middle', horizontal: 'left' };
       c13.border = thinBorder;
       c13.font = { name: 'Segoe UI', size: 10 };
-      c13.dataValidation = levyValidation;
     }
+
+    // Apply Range-Based Data Validations (Much cleaner XML, prevents workbook corruption and enables Excel native dropdown autocomplete)
+    const rawSheet = templateSheet as any;
+    rawSheet.dataValidations.add('C2:C1000', hsCodeValidation);
+    rawSheet.dataValidations.add('D2:D1000', rateValidation);
+    rawSheet.dataValidations.add('E2:E1000', uomValidation);
+    rawSheet.dataValidations.add('J2:J1000', saleTypeValidation);
+    rawSheet.dataValidations.add('K2:K1000', sroValidation);
+    rawSheet.dataValidations.add('L2:L1000', serialValidation);
+    rawSheet.dataValidations.add('M2:M1000', levyValidation);
 
     // Write to buffer
     const buffer = await workbook.xlsx.writeBuffer();
