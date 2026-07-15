@@ -126,48 +126,7 @@ export default function ImportExportButtons({ items }: ImportExportButtonsProps)
   };
 
   const handleDownloadTemplate = () => {
-    const templateData = [
-      {
-        'Product Code': 'PRD-001',
-        'Product Description': 'Agricultural Machinery Parts',
-        'HS Code': '8432.9010',
-        'Sales Tax Rate': '0.18',
-        'UOM': 'Numbers, pieces, units',
-        'Unit Price': 12500,
-        'Retail Price': 0,
-        'Initial Stock Quantity': 50,
-        'Initial Stock Total Value': 625000,
-        'Sale Type': 'Goods at standard rate (default)',
-        'SRO Schedule No': '',
-        'SRO Item Serial No': '',
-        'Petroleum Levy On': ''
-      },
-      {
-        'Product Code': 'PRD-002',
-        'Product Description': 'Iron Castings',
-        'HS Code': '7325.1000',
-        'Sales Tax Rate': '0.18',
-        'UOM': 'KG',
-        'Unit Price': 450,
-        'Retail Price': 0,
-        'Initial Stock Quantity': 1000,
-        'Initial Stock Total Value': 450000,
-        'Sale Type': 'Goods at standard rate (default)',
-        'SRO Schedule No': '',
-        'SRO Item Serial No': '',
-        'Petroleum Levy On': ''
-      }
-    ];
-
-    const worksheet = XLSX.utils.json_to_sheet(templateData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Product Template');
-    
-    // Auto-fit column widths for readability
-    const maxLens = Object.keys(templateData[0]).map(key => Math.max(key.length, 12));
-    worksheet['!cols'] = maxLens.map(len => ({ wch: len + 3 }));
-
-    XLSX.writeFile(workbook, 'product_upload_template.xlsx');
+    window.location.href = '/api/products/template';
   };
 
   const handleExportCatalog = () => {
