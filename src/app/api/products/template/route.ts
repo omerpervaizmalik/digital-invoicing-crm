@@ -67,52 +67,37 @@ export async function GET(req: NextRequest) {
       { showGridLines: true } // Ensure grid lines are visible
     ];
 
-    // Define columns
-    const columns = [
-      { header: 'Product Code', key: 'itemCode', width: 15 },
-      { header: 'Product Description', key: 'productDescription', width: 35 },
-      { header: 'HS Code', key: 'hsCode', width: 15 },
-      { header: 'Sales Tax Rate', key: 'rate', width: 18 },
-      { header: 'UOM', key: 'uoM', width: 22 },
-      { header: 'Unit Price', key: 'unitPrice', width: 15 },
-      { header: 'Retail Price', key: 'fixedNotifiedValueOrRetailPrice', width: 15 },
-      { header: 'Initial Stock Quantity', key: 'initialStock', width: 22 },
-      { header: 'Initial Stock Total Value', key: 'initialStockValue', width: 25 },
-      { header: 'Sale Type', key: 'saleType', width: 35 },
-      { header: 'SRO Schedule No', key: 'sroScheduleNo', width: 20 },
-      { header: 'SRO Item Serial No', key: 'sroItemSerialNo', width: 20 },
-      { header: 'Petroleum Levy On', key: 'petroleumLevyOn', width: 20 }
+    // Define columns and their styles
+    const columnDefinitions = [
+      { header: 'Product Code', key: 'itemCode', width: 15, align: 'left' },
+      { header: 'Product Description', key: 'productDescription', width: 35, align: 'left' },
+      { header: 'HS Code', key: 'hsCode', width: 15, align: 'center', bold: true },
+      { header: 'Sales Tax Rate', key: 'rate', width: 18, align: 'center', numFmt: '0%' },
+      { header: 'UOM', key: 'uoM', width: 22, align: 'left' },
+      { header: 'Unit Price', key: 'unitPrice', width: 15, align: 'right', numFmt: '#,##0.00' },
+      { header: 'Retail Price', key: 'fixedNotifiedValueOrRetailPrice', width: 15, align: 'right', numFmt: '#,##0.00' },
+      { header: 'Initial Stock Quantity', key: 'initialStock', width: 22, align: 'right', numFmt: '#,##0.00' },
+      { header: 'Initial Stock Total Value', key: 'initialStockValue', width: 25, align: 'right', numFmt: '#,##0.00' },
+      { header: 'Sale Type', key: 'saleType', width: 35, align: 'left' },
+      { header: 'SRO Schedule No', key: 'sroScheduleNo', width: 20, align: 'left' },
+      { header: 'SRO Item Serial No', key: 'sroItemSerialNo', width: 20, align: 'left' },
+      { header: 'Petroleum Levy On', key: 'petroleumLevyOn', width: 20, align: 'left' }
     ];
 
-    templateSheet.columns = columns;
+    templateSheet.columns = columnDefinitions.map(col => ({
+      header: col.header,
+      key: col.key,
+      width: col.width
+    }));
 
-    // Header styling
-    const headerRow = templateSheet.getRow(1);
-    headerRow.height = 32;
-
-    headerRow.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF065F46' } // Dark emerald
-      };
-      cell.font = {
-        name: 'Segoe UI',
-        size: 11,
-        bold: true,
-        color: { argb: 'FFFFFFFF' } // White
-      };
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center',
-        wrapText: true
-      };
-      cell.border = {
-        top: { style: 'thin', color: { argb: 'FF047857' } },
-        bottom: { style: 'medium', color: { argb: 'FF022C22' } },
-        left: { style: 'thin', color: { argb: 'FF047857' } },
-        right: { style: 'thin', color: { argb: 'FF047857' } }
-      };
+    // Apply column styling (efficiently styles all rows in the sheet)
+    columnDefinitions.forEach((col, idx) => {
+      const column = templateSheet.getColumn(idx + 1);
+      column.alignment = { vertical: 'middle', horizontal: col.align as any };
+      column.font = { name: 'Segoe UI', size: 10, bold: col.bold || false };
+      if (col.numFmt) {
+        column.numFmt = col.numFmt;
+      }
     });
 
     // Populate Sample Data
@@ -153,7 +138,7 @@ export async function GET(req: NextRequest) {
       templateSheet.addRow(item);
     });
 
-    // Style data rows and apply formulas/formats
+    // Format headers and sample data rows
     const thinBorder = {
       top: { style: 'thin' as const, color: { argb: 'FFE2E8F0' } },
       bottom: { style: 'thin' as const, color: { argb: 'FFE2E8F0' } },
@@ -161,6 +146,43 @@ export async function GET(req: NextRequest) {
       right: { style: 'thin' as const, color: { argb: 'FFE2E8F0' } }
     };
 
+    const headerRow = templateSheet.getRow(1);
+    headerRow.height = 32;
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF065F46' } // Dark emerald
+      };
+      cell.font = {
+        name: 'Segoe UI',
+        size: 11,
+        bold: true,
+        color: { argb: 'FFFFFFFF' } // White
+      };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center',
+        wrapText: true
+      };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF047857' } },
+        bottom: { style: 'medium', color: { argb: 'FF022C22' } },
+        left: { style: 'thin', color: { argb: 'FF047857' } },
+        right: { style: 'thin', color: { argb: 'FF047857' } }
+      };
+    });
+
+    // Style row heights and thin borders for sample rows only (2 and 3)
+    [2, 3].forEach((r) => {
+      const row = templateSheet.getRow(r);
+      row.height = 24;
+      row.eachCell((cell) => {
+        cell.border = thinBorder;
+      });
+    });
+
+    // Define validations
     const rateValidation = {
       type: 'list' as const,
       allowBlank: true,
@@ -224,96 +246,7 @@ export async function GET(req: NextRequest) {
       error: 'Please select a petroleum levy option from the dropdown list.'
     };
 
-    // Apply styles to the populated sample rows and set formats for columns 2 to 1000
-    for (let r = 2; r <= 1000; r++) {
-      const row = templateSheet.getRow(r);
-      row.height = 24;
-
-      // Product Code
-      const c1 = row.getCell(1);
-      c1.alignment = { vertical: 'middle', horizontal: 'left' };
-      c1.border = thinBorder;
-      c1.font = { name: 'Segoe UI', size: 10 };
-
-      // Product Description
-      const c2 = row.getCell(2);
-      c2.alignment = { vertical: 'middle', horizontal: 'left' };
-      c2.border = thinBorder;
-      c2.font = { name: 'Segoe UI', size: 10 };
-
-      // HS Code
-      const c3 = row.getCell(3);
-      c3.alignment = { vertical: 'middle', horizontal: 'center' };
-      c3.border = thinBorder;
-      c3.font = { name: 'Segoe UI', size: 10, bold: true };
-
-      // Sales Tax Rate
-      const c4 = row.getCell(4);
-      c4.numFmt = '0%';
-      c4.alignment = { vertical: 'middle', horizontal: 'center' };
-      c4.border = thinBorder;
-      c4.font = { name: 'Segoe UI', size: 10 };
-
-      // UOM
-      const c5 = row.getCell(5);
-      c5.alignment = { vertical: 'middle', horizontal: 'left' };
-      c5.border = thinBorder;
-      c5.font = { name: 'Segoe UI', size: 10 };
-
-      // Unit Price
-      const c6 = row.getCell(6);
-      c6.numFmt = '#,##0.00';
-      c6.alignment = { vertical: 'middle', horizontal: 'right' };
-      c6.border = thinBorder;
-      c6.font = { name: 'Segoe UI', size: 10 };
-
-      // Retail Price
-      const c7 = row.getCell(7);
-      c7.numFmt = '#,##0.00';
-      c7.alignment = { vertical: 'middle', horizontal: 'right' };
-      c7.border = thinBorder;
-      c7.font = { name: 'Segoe UI', size: 10 };
-
-      // Initial Stock Qty
-      const c8 = row.getCell(8);
-      c8.numFmt = '#,##0.00';
-      c8.alignment = { vertical: 'middle', horizontal: 'right' };
-      c8.border = thinBorder;
-      c8.font = { name: 'Segoe UI', size: 10 };
-
-      // Initial Stock Value
-      const c9 = row.getCell(9);
-      c9.numFmt = '#,##0.00';
-      c9.alignment = { vertical: 'middle', horizontal: 'right' };
-      c9.border = thinBorder;
-      c9.font = { name: 'Segoe UI', size: 10 };
-
-      // Sale Type
-      const c10 = row.getCell(10);
-      c10.alignment = { vertical: 'middle', horizontal: 'left' };
-      c10.border = thinBorder;
-      c10.font = { name: 'Segoe UI', size: 10 };
-
-      // SRO Schedule No
-      const c11 = row.getCell(11);
-      c11.alignment = { vertical: 'middle', horizontal: 'left' };
-      c11.border = thinBorder;
-      c11.font = { name: 'Segoe UI', size: 10 };
-
-      // SRO Item Serial No
-      const c12 = row.getCell(12);
-      c12.alignment = { vertical: 'middle', horizontal: 'left' };
-      c12.border = thinBorder;
-      c12.font = { name: 'Segoe UI', size: 10 };
-
-      // Petroleum Levy On
-      const c13 = row.getCell(13);
-      c13.alignment = { vertical: 'middle', horizontal: 'left' };
-      c13.border = thinBorder;
-      c13.font = { name: 'Segoe UI', size: 10 };
-    }
-
-    // Apply Range-Based Data Validations (Much cleaner XML, prevents workbook corruption and enables Excel native dropdown autocomplete)
+    // Apply Range-Based Data Validations (Prevent file corruption and allow Excel native dropdown autocompletion)
     const rawSheet = templateSheet as any;
     rawSheet.dataValidations.add('C2:C1000', hsCodeValidation);
     rawSheet.dataValidations.add('D2:D1000', rateValidation);
