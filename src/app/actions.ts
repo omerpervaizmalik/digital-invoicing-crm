@@ -238,10 +238,19 @@ export async function deleteSupplier(id: string) {
 // -------------------------------------------------------------------------------------------------
 // VOUCHERS / INVOICES ACTIONS
 export async function getInvoices(tenantId: string) {
-  return await prisma.invoice.findMany({ 
+  const invoices = await prisma.invoice.findMany({ 
     where: { tenantId },
-    include: { client: true, supplier: true }
-  })
+    include: { client: true, supplier: true, items: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return invoices.map(inv => {
+    let totalAmount = 0;
+    if (inv.items && inv.items.length > 0) {
+      totalAmount = inv.items.reduce((sum, item) => sum + (item.totalValues || 0) + (item.furtherTax || 0) + (item.extraTax || 0) + (item.fedPayable || 0) - (item.discount || 0), 0);
+    }
+    return { ...inv, totalAmount };
+  });
 }
 
 import { processInvoiceToStock, rollbackInvoiceFromStock } from '../lib/stockService'
