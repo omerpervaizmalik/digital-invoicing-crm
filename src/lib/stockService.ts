@@ -99,6 +99,81 @@ export async function processInvoiceToStock(invoiceId: string) {
   }
 }
 
+export async function rollbackInvoiceFromStock(invoiceId: string) {
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+    include: { items: true, client: true, supplier: true }
+  });
+
+  if (!invoice) throw new Error('Invoice not found');
+  if (invoice.status === 'DRAFT' || invoice.status === 'PENDING_APPROVAL') return; // Stock wasn't affected
+
+  const monthYear = new Date(invoice.invoiceDate).toISOString().slice(0, 7);
+
+  for (const item of invoice.items) {
+    const invType = invoice.invoiceType;
+    let qtyChange = item.quantity;
+    let valChange = item.valueSalesExcludingST;
+
+    if (invType === 'Purchase Invoice' || invType === 'Debit Note') {
+      if (invType === 'Debit Note') {
+        qtyChange = -qtyChange;
+        valChange = -valChange;
+      }
+      await prisma.stockRegister.update({
+        where: {
+          tenantId_itemCode_monthYear: {
+            tenantId: invoice.tenantId,
+            itemCode: item.itemCode,
+            monthYear: monthYear
+          }
+        },
+        data: {
+          purchasedQty: { decrement: qtyChange },
+          purchasedVal: { decrement: valChange }
+        }
+      });
+    } else {
+      if (invType === 'Credit Note') {
+        qtyChange = -qtyChange;
+        valChange = -valChange;
+      }
+      
+      let qtyField = 'domesticTaxableQty';
+      let valField = 'domesticTaxableVal';
+
+      const saleType = item.saleType || '';
+      const buyerType = invoice.client?.buyerRegistrationType || '';
+
+      if (saleType.includes('Exempt')) {
+        qtyField = 'exemptQty';
+        valField = 'exemptVal';
+      } else if (saleType.includes('Zero') || buyerType.includes('Export')) {
+        qtyField = 'zeroRatedQty';
+        valField = 'zeroRatedVal';
+      }
+
+      await prisma.stockRegister.update({
+        where: {
+          tenantId_itemCode_monthYear: {
+            tenantId: invoice.tenantId,
+            itemCode: item.itemCode,
+            monthYear: monthYear
+          }
+        },
+        data: {
+          [qtyField]: { decrement: qtyChange },
+          [valField]: { decrement: valChange }
+        }
+      });
+    }
+
+    // Recalculate closing balances
+    await recalculateClosingBalance(invoice.tenantId, item.itemCode, monthYear);
+  }
+}
+
+
 export async function recalculateClosingBalance(tenantId: string, itemCode: string, monthYear: string) {
   const stock = await prisma.stockRegister.findUnique({
     where: {

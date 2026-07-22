@@ -244,7 +244,7 @@ export async function getInvoices(tenantId: string) {
   })
 }
 
-import { processInvoiceToStock } from '../lib/stockService'
+import { processInvoiceToStock, rollbackInvoiceFromStock } from '../lib/stockService'
 
 export async function createInvoice(data: any) {
   const user = await getCurrentUser();
@@ -260,11 +260,13 @@ export async function createInvoice(data: any) {
   data.creatorId = user.id;
   
   // Role-based logic
-  if (user.role === 'STANDARD_USER') {
-    data.status = 'PENDING_APPROVAL';
-  } else {
-    data.status = 'DRAFT';
+  let initialStatus = 'DRAFT';
+  if (data.invoiceType === 'Purchase Invoice') {
+    initialStatus = 'VALID';
+  } else if (user.role === 'STANDARD_USER') {
+    initialStatus = 'PENDING_APPROVAL';
   }
+  data.status = initialStatus;
   
   const inv = await prisma.invoice.create({ data })
   
@@ -287,10 +289,15 @@ export async function approveInvoice(id: string) {
   const user = await getCurrentUser();
   if (!user || user.role === 'STANDARD_USER') throw new Error("Unauthorized to approve");
 
+  const invoice = await prisma.invoice.findUnique({ where: { id } });
+  if (!invoice) throw new Error("Invoice not found");
+
+  const newStatus = invoice.invoiceType === 'Purchase Invoice' ? 'VALID' : 'DRAFT';
+
   const inv = await prisma.invoice.update({
     where: { id },
     data: { 
-      status: 'DRAFT',
+      status: newStatus,
       approverId: user.id
     }
   });
@@ -330,6 +337,98 @@ export async function getInvoiceById(id: string) {
     where: { id },
     include: { client: true, supplier: true, items: true, tenant: true }
   })
+}
+
+export async function deleteInvoice(id: string) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== 'SUPERVISOR' && user.role !== 'TENANT_ADMIN' && user.role !== 'ULTIMATE_ADMIN')) {
+    throw new Error("Unauthorized to delete invoices");
+  }
+  
+  const invoice = await prisma.invoice.findUnique({ where: { id } });
+  if (!invoice || invoice.tenantId !== user.tenantId) {
+    throw new Error("Invoice not found or unauthorized");
+  }
+  
+  if (invoice.status !== 'DRAFT' && invoice.status !== 'PENDING_APPROVAL' && invoice.invoiceType !== 'Purchase Invoice') {
+     throw new Error("Cannot delete a finalized invoice. Please use Credit Note or Debit Note instead.");
+  }
+
+  // Rollback stock for VALID Purchase Invoices
+  if (invoice.status === 'VALID' || invoice.status === 'PENDING_FBR') {
+    try {
+      await rollbackInvoiceFromStock(invoice.id);
+    } catch (err) {
+      console.error("Stock rollback failed on delete:", err);
+    }
+  }
+
+  await prisma.invoice.delete({ where: { id } });
+  
+  await logActivity(user.tenantId, user.id, 'DELETE', 'INVOICE', `Deleted invoice: V-${invoice.voucherNumber}`);
+  revalidatePath('/vouchers');
+  revalidatePath('/stock-register');
+}
+
+export async function updateInvoice(id: string, data: any) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+  
+  const existingInvoice = await prisma.invoice.findUnique({ where: { id }, include: { items: true } });
+  if (!existingInvoice || existingInvoice.tenantId !== user.tenantId) {
+    throw new Error("Invoice not found or unauthorized");
+  }
+  
+  if (existingInvoice.status !== 'DRAFT' && existingInvoice.status !== 'PENDING_APPROVAL' && existingInvoice.invoiceType !== 'Purchase Invoice') {
+     throw new Error("Cannot edit a finalized invoice. Please use Credit Note or Debit Note instead.");
+  }
+
+  // Rollback existing stock first
+  if (existingInvoice.status === 'VALID' || existingInvoice.status === 'PENDING_FBR') {
+    try {
+      await rollbackInvoiceFromStock(existingInvoice.id);
+    } catch (err) {
+      console.error("Stock rollback failed on update:", err);
+    }
+  }
+
+  // Determine status (could change if type changed to/from Purchase Invoice)
+  let newStatus = 'DRAFT';
+  if (data.invoiceType === 'Purchase Invoice') {
+    newStatus = 'VALID';
+  } else if (user.role === 'STANDARD_USER') {
+    newStatus = 'PENDING_APPROVAL';
+  }
+  data.status = newStatus;
+
+  // Extract items for update
+  const { items, ...invoiceData } = data;
+
+  // Delete all existing items, then recreate
+  await prisma.invoiceItem.deleteMany({ where: { invoiceId: id } });
+
+  const updatedInvoice = await prisma.invoice.update({
+    where: { id },
+    data: {
+      ...invoiceData,
+      items: {
+        create: items.create // we expect items to have { create: [...] } similar to createInvoice
+      }
+    }
+  });
+
+  if (updatedInvoice.status !== 'PENDING_APPROVAL' && updatedInvoice.status !== 'DRAFT') {
+    try {
+      await processInvoiceToStock(updatedInvoice.id);
+    } catch (err) {
+      console.error("Stock update failed on invoice update:", err);
+    }
+  }
+
+  await logActivity(user.tenantId, user.id, 'UPDATE', 'INVOICE', `Updated invoice: V-${updatedInvoice.voucherNumber} (${updatedInvoice.status})`);
+  revalidatePath('/vouchers');
+  revalidatePath('/stock-register');
+  return updatedInvoice;
 }
 
 import fs from 'fs';

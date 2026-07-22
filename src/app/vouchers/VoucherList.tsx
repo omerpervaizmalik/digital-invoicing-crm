@@ -3,14 +3,27 @@
 import React, { useState, useMemo } from 'react';
 import { Receipt, Search, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
 import Link from 'next/link';
-import { postDraftToFBR } from '../actions';
+import { postDraftToFBR, deleteInvoice } from '../actions';
 import * as XLSX from 'xlsx';
+import { useRouter } from 'next/navigation';
 
 export default function VoucherList({ invoices }: { invoices: any[] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMonth, setFilterMonth] = useState(''); // YYYY-MM
   const [filterDate, setFilterDate] = useState(''); // YYYY-MM-DD
   const [filterType, setFilterType] = useState('ALL'); // ALL, Sale, Purchase
+  const router = useRouter();
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this voucher? This action cannot be undone.")) {
+      try {
+        await deleteInvoice(id);
+        alert("Voucher deleted successfully.");
+      } catch (err: any) {
+        alert(err.message || "Failed to delete voucher.");
+      }
+    }
+  };
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((v: any) => {
@@ -171,6 +184,12 @@ export default function VoucherList({ invoices }: { invoices: any[] }) {
                     <form action={postDraftToFBR.bind(null, v.id)} className="inline">
                       <button type="submit" className="text-amber-500 font-medium hover:text-amber-400 mr-3">Post to FBR</button>
                     </form>
+                  )}
+                  {(v.status === 'DRAFT' || v.status === 'PENDING_APPROVAL' || v.invoiceType === 'Purchase Invoice') && (
+                    <>
+                      <Link href={`/vouchers/${v.id}/edit`} className="text-blue-500 font-medium hover:underline mr-3">Edit</Link>
+                      <button onClick={() => handleDelete(v.id)} className="text-red-500 font-medium hover:underline mr-3">Delete</button>
+                    </>
                   )}
                   <Link href={`/vouchers/${v.id}`} className="text-emerald-500 font-medium hover:underline">View PDF</Link>
                 </td>

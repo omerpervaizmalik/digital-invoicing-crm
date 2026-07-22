@@ -2,21 +2,42 @@
 
 import React, { useState } from 'react';
 import { Receipt, Save, ShieldCheck, Plus, Trash2, Edit, X } from 'lucide-react';
-import { createInvoice, getFbrDropdownOptions } from '../../actions';
+import { createInvoice, updateInvoice, getFbrDropdownOptions } from '../../actions';
 import { useRouter } from 'next/navigation';
 
-export default function NewVoucherForm({ clients, suppliers, items, tenantId }: { clients: any[], suppliers: any[], items: any[], tenantId: string }) {
+export default function NewVoucherForm({ clients, suppliers, items, tenantId, initialData }: { clients: any[], suppliers: any[], items: any[], tenantId: string, initialData?: any }) {
   const router = useRouter();
-  const [invoiceCategory, setInvoiceCategory] = useState<'Sale' | 'Purchase'>('Sale');
-  const [clientId, setClientId] = useState('');
-  const [supplierId, setSupplierId] = useState('');
+  
+  const defaultInvoiceCategory = initialData?.supplierId ? 'Purchase' : 'Sale';
+  const [invoiceCategory, setInvoiceCategory] = useState<'Sale' | 'Purchase'>(defaultInvoiceCategory);
+  const [clientId, setClientId] = useState(initialData?.clientId || '');
+  const [supplierId, setSupplierId] = useState(initialData?.supplierId || '');
   const [selectedBusinessName, setSelectedBusinessName] = useState('');
-  const [invoiceType, setInvoiceType] = useState('Sale Invoice');
-  const [invoiceDate, setInvoiceDate] = useState('');
-  const [referenceNo, setReferenceNo] = useState('');
+  const [invoiceType, setInvoiceType] = useState(initialData?.invoiceType || 'Sale Invoice');
+  const [invoiceDate, setInvoiceDate] = useState(initialData?.invoiceDate ? new Date(initialData.invoiceDate).toISOString().split('T')[0] : '');
+  const [referenceNo, setReferenceNo] = useState(initialData?.invoiceRefNo || '');
   
   const [fbrOptions, setFbrOptions] = useState<any>({ documentTypes: [], saleTypes: [], petroleumLevyOn: [], rates: [], sros: [], itemSrNos: [] });
-  const [lineItems, setLineItems] = useState<any[]>([]);
+  
+  const defaultLineItems = initialData?.items?.map((li: any) => {
+    const it = items.find((i: any) => i.itemCode === li.itemCode);
+    return {
+      itemId: it?.id || '',
+      hsCode: li.hsCode,
+      productDescription: li.productDescription,
+      rate: li.rate,
+      uoM: li.uoM,
+      quantity: li.quantity,
+      price: li.quantity ? (li.valueSalesExcludingST / li.quantity) : 0,
+      fixedValue: li.fixedNotifiedValueOrRetailPrice,
+      saleType: li.saleType,
+      sroScheduleNo: li.sroScheduleNo,
+      sroItemSerialNo: li.sroItemSerialNo,
+      petroleumLevyOn: li.petroleumLevyOn
+    };
+  }) || [];
+  
+  const [lineItems, setLineItems] = useState<any[]>(defaultLineItems);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -182,7 +203,11 @@ export default function NewVoucherForm({ clients, suppliers, items, tenantId }: 
     };
 
     try {
-      await createInvoice(payload);
+      if (initialData?.id) {
+        await updateInvoice(initialData.id, payload);
+      } else {
+        await createInvoice(payload);
+      }
       router.push('/vouchers');
     } catch (error) {
       console.error(error);
