@@ -1,7 +1,7 @@
 import React from 'react';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-import { Package, Download, Search } from 'lucide-react';
+import { Package, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import ExportButton from './ExportButton';
 import AddStockModal from './AddStockModal';
 import LoadPreviousMonthButton from './LoadPreviousMonthButton';
@@ -17,6 +17,16 @@ export default async function StockRegisterPage({
   const resolvedParams = await searchParams;
   const currentMonth = resolvedParams.month || new Date().toISOString().slice(0, 7);
   const searchQuery = resolvedParams.search || '';
+
+  // Calculate prev/next months for easy navigation
+  const currentMonthDate = new Date(`${currentMonth}-01T12:00:00Z`);
+  const prevMonthDate = new Date(currentMonthDate);
+  prevMonthDate.setUTCMonth(prevMonthDate.getUTCMonth() - 1);
+  const nextMonthDate = new Date(currentMonthDate);
+  nextMonthDate.setUTCMonth(nextMonthDate.getUTCMonth() + 1);
+
+  const prevMonthStr = prevMonthDate.toISOString().slice(0, 7);
+  const nextMonthStr = nextMonthDate.toISOString().slice(0, 7);
 
   // In reality, this would fetch the logged in tenant's ID
   const tenant = await prisma.tenant.findFirst();
@@ -55,13 +65,29 @@ export default async function StockRegisterPage({
                   className="bg-neutral-900 border border-neutral-800 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
-              <input 
-                type="month" 
-                name="month"
-                defaultValue={currentMonth}
-                className="bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-              <button type="submit" className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Filter</button>
+              <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-lg p-1">
+                <Link 
+                  href={`/stock-register?month=${prevMonthStr}${searchQuery ? `&search=${searchQuery}` : ''}`}
+                  className="p-1.5 hover:bg-neutral-800 rounded-md text-neutral-400 hover:text-white transition-colors"
+                  title="Previous Month"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Link>
+                <input 
+                  type="month" 
+                  name="month"
+                  defaultValue={currentMonth}
+                  className="bg-transparent px-2 py-1 text-sm focus:outline-none text-center"
+                />
+                <Link 
+                  href={`/stock-register?month=${nextMonthStr}${searchQuery ? `&search=${searchQuery}` : ''}`}
+                  className="p-1.5 hover:bg-neutral-800 rounded-md text-neutral-400 hover:text-white transition-colors"
+                  title="Next Month"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <button type="submit" className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Go</button>
             </form>
             {tenant && <LoadPreviousMonthButton tenantId={tenant.id} currentMonth={currentMonth} />}
             {tenant && <AddStockModal tenantId={tenant.id} monthYear={currentMonth} />}
