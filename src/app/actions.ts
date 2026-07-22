@@ -184,9 +184,9 @@ export async function updateSupplier(id: string, data: any) {
 // ITEM ACTIONS
 export async function getItems(tenantId: string) {
   const items = await prisma.item.findMany({ where: { tenantId } })
-  const monthYear = new Date().toISOString().slice(0, 7);
   const stocks = await prisma.stockRegister.findMany({
-    where: { tenantId, monthYear }
+    where: { tenantId },
+    orderBy: { monthYear: 'desc' }
   });
 
   return items.map((item: any) => {
@@ -545,60 +545,75 @@ export async function updateItem(id: string, data: any) {
 }
 
 export async function loadPreviousMonthStock(tenantId: string, currentMonth: string) {
-  // Parse current month (YYYY-MM)
-  const [yearStr, monthStr] = currentMonth.split('-');
-  let year = parseInt(yearStr);
-  let month = parseInt(monthStr);
-
-  month -= 1;
-  if (month === 0) {
-    month = 12;
-    year -= 1;
-  }
-  const prevMonthStr = `${year}-${String(month).padStart(2, '0')}`;
-
-  const prevMonthData = await prisma.stockRegister.findMany({
-    where: { tenantId, monthYear: prevMonthStr }
+  // Fetch all stock registers for this tenant BEFORE or EQUAL to currentMonth
+  const allPastStocks = await prisma.stockRegister.findMany({
+    where: { 
+      tenantId,
+      monthYear: { lte: currentMonth } 
+    },
+    orderBy: { monthYear: 'asc' }
   });
 
-  if (prevMonthData.length === 0) {
-    return { success: false, error: 'No stock data found for previous month.' };
+  if (allPastStocks.length === 0) {
+    return { success: false, error: 'No stock data found to sync.' };
+  }
+
+  // Get distinct months present in the DB, in ascending order
+  const distinctMonths = Array.from(new Set(allPastStocks.map(s => s.monthYear))).sort();
+  
+  // We need to cascade up to currentMonth, so make sure currentMonth is in our list
+  if (!distinctMonths.includes(currentMonth)) {
+    distinctMonths.push(currentMonth);
+    distinctMonths.sort();
   }
 
   try {
-    for (const prevRow of prevMonthData) {
-      // Create or update current month entry
-      await prisma.stockRegister.upsert({
-        where: {
-          tenantId_itemCode_monthYear: {
-            tenantId,
-            itemCode: prevRow.itemCode,
-            monthYear: currentMonth
-          }
-        },
-        update: {
-          openingQty: prevRow.closingQty,
-          openingVal: prevRow.closingVal
-        },
-        create: {
-          tenantId,
-          itemCode: prevRow.itemCode,
-          hsCode: prevRow.hsCode,
-          uoM: prevRow.uoM,
-          salesTaxRate: prevRow.salesTaxRate,
-          monthYear: currentMonth,
-          openingQty: prevRow.closingQty,
-          openingVal: prevRow.closingVal
-        }
+    // Process month by month chronologically
+    for (let i = 0; i < distinctMonths.length - 1; i++) {
+      const prevMonthStr = distinctMonths[i];
+      const nextMonthStr = distinctMonths[i + 1];
+
+      // Get all closing balances for prevMonth
+      const prevMonthData = await prisma.stockRegister.findMany({
+        where: { tenantId, monthYear: prevMonthStr }
       });
 
-      // Recalculate current month's closing
-      await recalculateClosingBalance(tenantId, prevRow.itemCode, currentMonth);
+      for (const prevRow of prevMonthData) {
+        // Carry forward to nextMonth
+        await prisma.stockRegister.upsert({
+          where: {
+            tenantId_itemCode_monthYear: {
+              tenantId,
+              itemCode: prevRow.itemCode,
+              monthYear: nextMonthStr
+            }
+          },
+          update: {
+            openingQty: prevRow.closingQty,
+            openingVal: prevRow.closingVal
+          },
+          create: {
+            tenantId,
+            itemCode: prevRow.itemCode,
+            hsCode: prevRow.hsCode,
+            uoM: prevRow.uoM,
+            salesTaxRate: prevRow.salesTaxRate,
+            monthYear: nextMonthStr,
+            openingQty: prevRow.closingQty,
+            openingVal: prevRow.closingVal
+          }
+        });
+
+        // Recalculate the next month's closing
+        await recalculateClosingBalance(tenantId, prevRow.itemCode, nextMonthStr);
+      }
     }
+    
     revalidatePath('/stock-register');
+    revalidatePath('/items');
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err.message || 'Failed to load previous month data.' };
+    return { success: false, error: err.message || 'Failed to sync stocks' };
   }
 }
 
