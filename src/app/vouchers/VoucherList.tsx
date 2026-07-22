@@ -105,8 +105,8 @@ export default function VoucherList({ invoices }: { invoices: any[] }) {
           className="bg-neutral-950 border border-neutral-800 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
         >
           <option value="ALL">All Types</option>
-          <option value="Sale">Sale</option>
-          <option value="Purchase">Purchase</option>
+          <option value="Sale Invoice">Sale</option>
+          <option value="Purchase Invoice">Purchase</option>
         </select>
 
         <input 
