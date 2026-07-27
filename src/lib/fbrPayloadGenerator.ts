@@ -18,7 +18,14 @@ export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = fa
   const fbrItems: FbrItem[] = invoice.items.map(item => ({
     hsCode: item.hsCode,
     productDescription: item.productDescription,
-    rate: item.rate ? String(item.rate) : "0%",
+    rate: (() => {
+      if (!item.rate) return "0%";
+      let strRate = String(item.rate);
+      if (strRate.includes("%")) return strRate;
+      let numRate = Number(strRate);
+      if (numRate < 1) numRate = numRate * 100; // convert 0.18 to 18
+      return `${numRate}%`;
+    })(),
     uoM: item.uoM,
     quantity: f(item.quantity, 4),
     totalValues: f(item.totalValues, 2),
