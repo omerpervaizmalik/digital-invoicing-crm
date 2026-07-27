@@ -21,7 +21,7 @@ export default function ImpersonationBanner({ userName }: { userName: string }) 
   };
 
   return (
-    <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+    <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md print:hidden">
       <div className="font-semibold text-sm">
         ⚠️ You are currently impersonating <span className="font-bold underline">{userName}</span>. All actions are logged.
       </div>

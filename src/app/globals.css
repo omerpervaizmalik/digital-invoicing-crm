@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+@media print {
+  @page {
+    margin: 0; /* Removes browser headers/footers */
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding: 1.5cm; /* Restores inner margin since page margin is 0 */
+  }
+}

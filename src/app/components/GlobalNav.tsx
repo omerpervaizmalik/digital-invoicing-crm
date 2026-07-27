@@ -29,7 +29,7 @@ export default function GlobalNav({ businessName, role }: { businessName: string
   }
 
   return (
-    <nav className="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl sticky top-0 z-50">
+    <nav className="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl sticky top-0 z-50 print:hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         
         {/* Logo and Brand */}
