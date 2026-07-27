@@ -35,11 +35,13 @@ export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = fa
     sroItemSerialNo: item.sroItemSerialNo || "",
   }));
 
+  const cleanId = (id: string | null | undefined) => id ? id.replace(/[^0-9]/g, '') : "";
+
   const payload: FbrInvoicePayload = {
     invoiceType: invoice.invoiceType, // "Sale Invoice" or "Debit Note"
     // FBR expects YYYY-MM-DD
     invoiceDate: invoice.invoiceDate.toISOString().split("T")[0],
-    sellerNTNCNIC: invoice.tenant.ntnCnic,
+    sellerNTNCNIC: cleanId(invoice.tenant.ntnCnic),
     sellerBusinessName: invoice.tenant.businessName,
     sellerProvince: invoice.tenant.province,
     sellerAddress: invoice.tenant.address,
@@ -54,10 +56,10 @@ export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = fa
   };
 
   if (invoice.client.buyerRegistrationType === "Registered" && invoice.client.buyerNTNCNIC) {
-    payload.buyerNTNCNIC = invoice.client.buyerNTNCNIC;
+    payload.buyerNTNCNIC = cleanId(invoice.client.buyerNTNCNIC);
   } else if (invoice.client.buyerNTNCNIC) {
     // FBR docs state buyerNTNCNIC is optional in case of Unregistered, but we send it if we have it
-    payload.buyerNTNCNIC = invoice.client.buyerNTNCNIC;
+    payload.buyerNTNCNIC = cleanId(invoice.client.buyerNTNCNIC);
   } else {
     // If it's unregistered and no CNIC, FBR docs show a string of 13 zeros, or just leave it out.
     // We'll leave it undefined to let FBR validate it correctly.
