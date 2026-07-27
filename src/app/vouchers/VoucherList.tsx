@@ -7,7 +7,7 @@ import { postDraftToFBR, deleteInvoice } from '../actions';
 import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
 
-export default function VoucherList({ invoices, fbrEnvironment = 'PRODUCTION' }: { invoices: any[], fbrEnvironment?: string }) {
+export default function VoucherList({ invoices, fbrEnvironment = 'SANDBOX' }: { invoices: any[], fbrEnvironment?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMonth, setFilterMonth] = useState(''); // YYYY-MM
   const [filterDate, setFilterDate] = useState(''); // YYYY-MM-DD

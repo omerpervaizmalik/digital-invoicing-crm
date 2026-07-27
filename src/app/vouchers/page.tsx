@@ -28,7 +28,7 @@ export default async function VouchersPage() {
 
         <VoucherList 
           invoices={invoices} 
-          fbrEnvironment={tenant?.fbrIntegration?.environment || 'PRODUCTION'} 
+          fbrEnvironment={tenant?.fbrIntegration?.environment || 'SANDBOX'} 
         />
       </main>
     </div>
