@@ -232,7 +232,7 @@ export default function VoucherList({ invoices, fbrEnvironment = 'SANDBOX' }: { 
                       {isPosting && postingInvoiceId === v.id ? 'Posting...' : (v.status === 'PENDING_FBR' ? 'Retry Post' : 'Post to FBR')}
                     </button>
                   )}
-                  {(v.status === 'DRAFT' || v.status === 'PENDING_APPROVAL' || v.invoiceType === 'Purchase Invoice') && (
+                  {(v.status === 'DRAFT' || v.status === 'PENDING_APPROVAL' || v.status === 'INVALID' || v.status === 'FAILED_CONNECTION' || v.invoiceType === 'Purchase Invoice') && (
                     <>
                       <Link href={`/vouchers/${v.id}/edit`} className="text-blue-500 font-medium hover:underline mr-3">Edit</Link>
                       <button onClick={() => handleDelete(v.id)} className="text-red-500 font-medium hover:underline mr-3">Delete</button>
