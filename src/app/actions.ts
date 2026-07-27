@@ -414,7 +414,13 @@ export async function deleteInvoice(id: string) {
     throw new Error("Invoice not found or unauthorized");
   }
   
-  if (invoice.status !== 'DRAFT' && invoice.status !== 'PENDING_APPROVAL' && invoice.invoiceType !== 'Purchase Invoice') {
+  if (
+    invoice.status !== 'DRAFT' && 
+    invoice.status !== 'PENDING_APPROVAL' && 
+    invoice.status !== 'INVALID' &&
+    invoice.status !== 'FAILED_CONNECTION' &&
+    invoice.invoiceType !== 'Purchase Invoice'
+  ) {
      throw new Error("Cannot delete a finalized invoice. Please use Credit Note or Debit Note instead.");
   }
 
