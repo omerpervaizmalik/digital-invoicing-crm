@@ -223,13 +223,13 @@ export default function VoucherList({ invoices, fbrEnvironment = 'SANDBOX' }: { 
                   )}
                 </td>
                 <td className="px-4 py-4 text-right space-x-3">
-                  {(v.status === 'DRAFT' || v.status === 'INVALID' || v.status === 'FAILED_CONNECTION') && (
+                  {(v.status === 'DRAFT' || v.status === 'INVALID' || v.status === 'FAILED_CONNECTION' || v.status === 'PENDING_FBR') && (
                     <button 
                       onClick={() => handlePostToFBR(v.id)} 
                       disabled={isPosting}
                       className="text-amber-500 font-medium hover:text-amber-400 mr-3 disabled:opacity-50"
                     >
-                      {isPosting && postingInvoiceId === v.id ? 'Posting...' : 'Post to FBR'}
+                      {isPosting && postingInvoiceId === v.id ? 'Posting...' : (v.status === 'PENDING_FBR' ? 'Retry Post' : 'Post to FBR')}
                     </button>
                   )}
                   {(v.status === 'DRAFT' || v.status === 'PENDING_APPROVAL' || v.invoiceType === 'Purchase Invoice') && (
