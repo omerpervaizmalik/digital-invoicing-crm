@@ -68,7 +68,14 @@ export async function transmitInvoiceToFBR(config: FbrConfig, payload: any): Pro
       agent: getAgent(),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      // If it's not JSON, it's likely an HTML error page (e.g. 503 Service Unavailable, 403 Forbidden)
+      throw new Error(`FBR Transmit Error: ${response.status} ${response.statusText} - ${text.substring(0, 100)}...`);
+    }
 
     if (!response.ok) {
       throw new Error(`FBR Transmit Error: ${JSON.stringify(data)}`);
