@@ -71,10 +71,21 @@ export async function transmitInvoiceToFBR(config: FbrConfig, payload: any): Pro
     const text = await response.text();
     let data;
     try {
-      data = JSON.parse(text);
+      const cleanText = text.replace(/^\uFEFF/, '').trim();
+      data = JSON.parse(cleanText);
     } catch (e) {
-      // If it's not JSON, it's likely an HTML error page (e.g. 503 Service Unavailable, 403 Forbidden)
-      throw new Error(`FBR Transmit Error: ${response.status} ${response.statusText} - ${text.substring(0, 100)}...`);
+      if (!response.ok) {
+        throw new Error(`FBR Transmit Error: ${response.status} ${response.statusText} - ${text}`);
+      }
+      // If 200 OK but invalid JSON, try to extract InvoiceNumber via Regex
+      const invMatch = text.match(/"InvoiceNumber"\s*:\s*"([^"]+)"/i);
+      const msgMatch = text.match(/"(?:Response|message|Error)"\s*:\s*"([^"]+)"/i);
+      if (invMatch) {
+        data = { invoiceNumber: invMatch[1] };
+      } else {
+        // Return raw text as message so it shows up in UI
+        data = { message: `Invalid JSON received from FBR: ${text}` };
+      }
     }
 
     if (!response.ok) {
