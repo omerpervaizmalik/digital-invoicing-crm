@@ -88,10 +88,9 @@ export async function transmitInvoiceToFBR(config: FbrConfig, payload: any): Pro
       }
     }
 
-    if (!response.ok) {
-      throw new Error(`FBR Transmit Error: ${JSON.stringify(data)}`);
-    }
-
+    // We removed the throw on !response.ok here because FBR uses HTTP error statuses (like 400) 
+    // to return valid JSON business logic errors. We want to return that JSON to actions.ts so it 
+    // sets the status to INVALID instead of FAILED_CONNECTION.
     return data;
   } catch (error) {
     console.error('FBR Transmission Error:', error);
