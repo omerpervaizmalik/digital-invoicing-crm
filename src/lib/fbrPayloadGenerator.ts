@@ -8,12 +8,17 @@ type FullInvoice = Invoice & {
 };
 
 export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = false, scenarioId?: string): FbrInvoicePayload {
-  const f = (num: number | null | undefined, dec: number = 2) => num ? Number(num.toFixed(dec)) : 0;
+  const f = (num: any, dec: number = 2) => {
+    if (num === null || num === undefined || num === '') return 0;
+    const parsed = Number(num);
+    if (isNaN(parsed)) return 0;
+    return Number(parsed.toFixed(dec));
+  };
 
   const fbrItems: FbrItem[] = invoice.items.map(item => ({
     hsCode: item.hsCode,
     productDescription: item.productDescription,
-    rate: f(item.rate, 2),
+    rate: item.rate ? String(item.rate) : "0%",
     uoM: item.uoM,
     quantity: f(item.quantity, 4),
     totalValues: f(item.totalValues, 2),
