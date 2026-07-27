@@ -71,7 +71,7 @@ export async function transmitInvoiceToFBR(config: FbrConfig, payload: any): Pro
     const text = await response.text();
     let data;
     try {
-      const cleanText = text.replace(/^\uFEFF/, '').trim();
+      const cleanText = text.replace(/^\uFEFF/, '').trim().replace(/,\s*([\]}])/g, '$1');
       data = JSON.parse(cleanText);
     } catch (e) {
       if (!response.ok) {

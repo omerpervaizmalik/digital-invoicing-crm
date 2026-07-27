@@ -8,22 +8,24 @@ type FullInvoice = Invoice & {
 };
 
 export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = false, scenarioId?: string): FbrInvoicePayload {
+  const f = (num: number | null | undefined, dec: number = 2) => num ? Number(num.toFixed(dec)) : 0;
+
   const fbrItems: FbrItem[] = invoice.items.map(item => ({
     hsCode: item.hsCode,
     productDescription: item.productDescription,
-    rate: item.rate,
+    rate: f(item.rate, 2),
     uoM: item.uoM,
-    quantity: item.quantity,
-    totalValues: item.totalValues,
-    valueSalesExcludingST: item.valueSalesExcludingST,
-    fixedNotifiedValueOrRetailPrice: item.fixedNotifiedValueOrRetailPrice,
-    salesTaxApplicable: item.salesTaxApplicable,
-    salesTaxWithheldAtSource: item.salesTaxWithheldAtSource,
-    extraTax: item.extraTax,
-    furtherTax: item.furtherTax,
+    quantity: f(item.quantity, 4),
+    totalValues: f(item.totalValues, 2),
+    valueSalesExcludingST: f(item.valueSalesExcludingST, 2),
+    fixedNotifiedValueOrRetailPrice: f(item.fixedNotifiedValueOrRetailPrice, 2),
+    salesTaxApplicable: f(item.salesTaxApplicable, 2),
+    salesTaxWithheldAtSource: f(item.salesTaxWithheldAtSource, 2),
+    extraTax: f(item.extraTax, 2),
+    furtherTax: f(item.furtherTax, 2),
     sroScheduleNo: item.sroScheduleNo || "",
-    fedPayable: item.fedPayable,
-    discount: item.discount,
+    fedPayable: f(item.fedPayable, 2),
+    discount: f(item.discount, 2),
     saleType: item.saleType,
     sroItemSerialNo: item.sroItemSerialNo || "",
   }));
