@@ -7,12 +7,17 @@ import { postDraftToFBR, deleteInvoice } from '../actions';
 import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
 
-export default function VoucherList({ invoices }: { invoices: any[] }) {
+export default function VoucherList({ invoices, fbrEnvironment = 'PRODUCTION' }: { invoices: any[], fbrEnvironment?: string }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMonth, setFilterMonth] = useState(''); // YYYY-MM
   const [filterDate, setFilterDate] = useState(''); // YYYY-MM-DD
   const [filterType, setFilterType] = useState('ALL'); // ALL, Sale, Purchase
   const router = useRouter();
+
+  // State for Sandbox Post Modal
+  const [postingInvoiceId, setPostingInvoiceId] = useState<string | null>(null);
+  const [scenarioId, setScenarioId] = useState('SN001');
+  const [isPosting, setIsPosting] = useState(false);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this voucher? This action cannot be undone.")) {
@@ -22,6 +27,35 @@ export default function VoucherList({ invoices }: { invoices: any[] }) {
       } catch (err: any) {
         alert(err.message || "Failed to delete voucher.");
       }
+    }
+  };
+
+  const handlePostToFBR = async (id: string) => {
+    if (fbrEnvironment === 'SANDBOX') {
+      setPostingInvoiceId(id);
+    } else {
+      // Production - post directly without scenario ID
+      try {
+        setIsPosting(true);
+        await postDraftToFBR(id);
+      } catch (err: any) {
+        alert(err.message || "Failed to post to FBR.");
+      } finally {
+        setIsPosting(false);
+      }
+    }
+  };
+
+  const confirmPostSandbox = async () => {
+    if (!postingInvoiceId) return;
+    try {
+      setIsPosting(true);
+      await postDraftToFBR(postingInvoiceId, scenarioId);
+      setPostingInvoiceId(null);
+    } catch (err: any) {
+      alert(err.message || "Failed to post to FBR Sandbox.");
+    } finally {
+      setIsPosting(false);
     }
   };
 
@@ -175,15 +209,28 @@ export default function VoucherList({ invoices }: { invoices: any[] }) {
                 <td className="px-4 py-4 font-mono font-medium text-emerald-500">{v.totalAmount ? `Rs ${v.totalAmount.toLocaleString()}` : '-'}</td>
                 <td className="px-4 py-4 text-neutral-400">{new Date(v.invoiceDate).toLocaleDateString()}</td>
                 <td className="px-4 py-4">
-                  {v.status === 'VALID' && <span className="flex items-center gap-1.5 text-emerald-500 font-medium"><CheckCircle className="w-4 h-4" /> Valid</span>}
+                  {v.status === 'VALID' && <span className="flex items-center gap-1.5 text-emerald-500 font-medium" title={v.fbrInvoiceNumber ? `FBR Inv: ${v.fbrInvoiceNumber}` : ''}><CheckCircle className="w-4 h-4" /> Valid</span>}
                   {(v.status === 'PENDING_FBR' || v.status === 'DRAFT') && <span className="flex items-center gap-1.5 text-amber-500 font-medium"><Clock className="w-4 h-4" /> {v.status}</span>}
-                  {(v.status === 'INVALID' || v.status === 'FAILED_CONNECTION') && <span className="flex items-center gap-1.5 text-rose-500 font-medium"><XCircle className="w-4 h-4" /> {v.status}</span>}
+                  {(v.status === 'INVALID' || v.status === 'FAILED_CONNECTION') && (
+                    <div className="flex flex-col">
+                      <span className="flex items-center gap-1.5 text-rose-500 font-medium"><XCircle className="w-4 h-4" /> {v.status}</span>
+                      {v.validationError && (
+                        <span className="text-[10px] text-rose-400 mt-1 max-w-[200px] truncate" title={v.validationError}>
+                          {v.validationError}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-4 text-right space-x-3">
-                  {v.status === 'DRAFT' && (
-                    <form action={postDraftToFBR.bind(null, v.id)} className="inline">
-                      <button type="submit" className="text-amber-500 font-medium hover:text-amber-400 mr-3">Post to FBR</button>
-                    </form>
+                  {(v.status === 'DRAFT' || v.status === 'INVALID' || v.status === 'FAILED_CONNECTION') && (
+                    <button 
+                      onClick={() => handlePostToFBR(v.id)} 
+                      disabled={isPosting}
+                      className="text-amber-500 font-medium hover:text-amber-400 mr-3 disabled:opacity-50"
+                    >
+                      {isPosting && postingInvoiceId === v.id ? 'Posting...' : 'Post to FBR'}
+                    </button>
                   )}
                   {(v.status === 'DRAFT' || v.status === 'PENDING_APPROVAL' || v.invoiceType === 'Purchase Invoice') && (
                     <>
@@ -198,6 +245,46 @@ export default function VoucherList({ invoices }: { invoices: any[] }) {
           </tbody>
         </table>
       </div>
+
+      {postingInvoiceId && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4 text-white">Sandbox Testing Mode</h3>
+            <p className="text-neutral-400 mb-6 text-sm">
+              You are currently in Sandbox mode. Please select the Scenario ID for this test invoice so that FBR can correctly validate your sandbox scenario testing bucket.
+            </p>
+            
+            <label className="block text-sm font-medium text-neutral-300 mb-2">Scenario ID</label>
+            <select
+              value={scenarioId}
+              onChange={(e) => setScenarioId(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl py-3 px-4 text-white mb-6"
+            >
+              {[...Array(28)].map((_, i) => {
+                const id = `SN${String(i + 1).padStart(3, '0')}`;
+                return <option key={id} value={id}>{id}</option>;
+              })}
+            </select>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setPostingInvoiceId(null)}
+                className="px-5 py-2.5 rounded-xl font-medium bg-neutral-800 text-white hover:bg-neutral-700 transition-colors"
+                disabled={isPosting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmPostSandbox}
+                className="px-5 py-2.5 rounded-xl font-bold bg-amber-500 text-neutral-950 hover:bg-amber-400 transition-colors"
+                disabled={isPosting}
+              >
+                {isPosting ? 'Transmitting...' : 'Transmit to FBR'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

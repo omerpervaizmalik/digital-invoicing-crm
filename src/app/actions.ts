@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { getSession } from '../lib/session'
 import { redirect } from 'next/navigation'
 import { logActivity } from '../lib/activityLogger'
+import { generateFbrPayload } from '../lib/fbrPayloadGenerator'
+import { transmitInvoiceToFBR } from '../lib/fbrService'
 
 const prisma = new PrismaClient()
 
@@ -16,7 +18,6 @@ export async function requireCompleteProfile() {
   return tenant;
 }
 
-// Utility to get the current tenant based on the session
 export async function getCurrentTenant() {
   const session = await getSession();
   if (!session || !session.tenantId) {
@@ -24,7 +25,8 @@ export async function getCurrentTenant() {
   }
   
   const tenant = await prisma.tenant.findUnique({
-    where: { id: session.tenantId as string }
+    where: { id: session.tenantId as string },
+    include: { fbrIntegration: true }
   });
   
   return tenant;
@@ -322,19 +324,71 @@ export async function approveInvoice(id: string) {
   return inv;
 }
 
-export async function postDraftToFBR(id: string) {
-  const inv = await prisma.invoice.update({
+export async function postDraftToFBR(id: string, scenarioId?: string) {
+  const invoice = await prisma.invoice.findUnique({
     where: { id },
-    data: { status: 'PENDING_FBR' }
-  })
+    include: { client: true, items: true, tenant: { include: { fbrIntegration: true } } }
+  });
+
+  if (!invoice || !invoice.client || !invoice.tenant || !invoice.tenant.fbrIntegration) {
+    throw new Error("Missing required data (Client, Tenant, or FBR Integration) to transmit to FBR.");
+  }
+
+  const fbrConfig = {
+    posId: invoice.tenant.fbrIntegration.posId,
+    fbrToken: invoice.tenant.fbrToken || "",
+    environment: invoice.tenant.fbrIntegration.environment as 'SANDBOX' | 'PRODUCTION'
+  };
+
+  const isSandbox = fbrConfig.environment === 'SANDBOX';
+  const payload = generateFbrPayload(invoice as any, isSandbox, scenarioId);
+
   try {
-    await processInvoiceToStock(inv.id)
+    const response = await transmitInvoiceToFBR(fbrConfig, payload);
+    
+    // Check if the FBR response contains an invoice number indicating success
+    if (response && response.invoiceNumber) {
+      await prisma.invoice.update({
+        where: { id },
+        data: { 
+          status: 'VALID', 
+          fbrInvoiceNumber: response.invoiceNumber,
+          validationError: null 
+        }
+      });
+    } else {
+      // It's likely a validation error
+      await prisma.invoice.update({
+        where: { id },
+        data: { 
+          status: 'INVALID', 
+          validationError: response.message || JSON.stringify(response) 
+        }
+      });
+    }
+  } catch (error: any) {
+    console.error("FBR Transmission Error:", error);
+    await prisma.invoice.update({
+      where: { id },
+      data: { 
+        status: 'FAILED_CONNECTION', 
+        validationError: error.message || "Failed to connect to FBR." 
+      }
+    });
+  }
+
+  try {
+    const invStatus = await prisma.invoice.findUnique({ where: { id }, select: { status: true } });
+    if (invStatus && invStatus.status === 'VALID') {
+      await processInvoiceToStock(id)
+    }
   } catch (err) {
     console.error("Stock update failed on draft post:", err)
   }
+  
   const user = await getCurrentUser()
   if (user && user.tenantId) {
-    await logActivity(user.tenantId, user.id, 'UPDATE', 'INVOICE', `Posted invoice to FBR: V-${inv.voucherNumber}`)
+    await logActivity(user.tenantId, user.id, 'UPDATE', 'INVOICE', `Attempted to post invoice to FBR: V-${invoice.voucherNumber}`)
   }
   revalidatePath('/vouchers')
   revalidatePath('/')

@@ -26,7 +26,10 @@ export default async function VouchersPage() {
           </Link>
         </header>
 
-        <VoucherList invoices={invoices} />
+        <VoucherList 
+          invoices={invoices} 
+          fbrEnvironment={tenant?.fbrIntegration?.environment || 'PRODUCTION'} 
+        />
       </main>
     </div>
   );
