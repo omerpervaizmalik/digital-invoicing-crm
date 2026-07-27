@@ -35,7 +35,7 @@ export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = fa
     sroItemSerialNo: item.sroItemSerialNo || "",
   }));
 
-  const cleanId = (id: string | null | undefined) => id ? id.replace(/[^0-9]/g, '') : "";
+  const cleanId = (id: string | null | undefined) => id ? id.replace(/[\s-]/g, '') : "";
 
   const payload: FbrInvoicePayload = {
     invoiceType: invoice.invoiceType, // "Sale Invoice" or "Debit Note"
