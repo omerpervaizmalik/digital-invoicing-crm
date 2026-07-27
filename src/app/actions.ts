@@ -324,7 +324,8 @@ export async function approveInvoice(id: string) {
   return inv;
 }
 
-export async function postDraftToFBR(id: string, scenarioId?: string) {
+export async function postDraftToFBR(id: string, scenarioIdOrFormData?: string | FormData) {
+  const scenarioId = typeof scenarioIdOrFormData === 'string' ? scenarioIdOrFormData : undefined;
   const invoice = await prisma.invoice.findUnique({
     where: { id },
     include: { client: true, items: true, tenant: { include: { fbrIntegration: true } } }
