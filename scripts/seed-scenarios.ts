@@ -990,22 +990,17 @@ const scenarios = [
 async function main() {
   console.log('Seeding scenario test data...');
   for (const scenario of scenarios) {
-    // 1. Ensure Tenant exists
+    // 1. Use Existing Tenant "Trade Inn"
+    const TARGET_TENANT_ID = 'cmr9dlxcz0000ji04qm0k6ye8';
+    const TARGET_CREATOR_ID = 'cmr9dlxlp0002ji04qc7z3bnh';
+
     let tenant = await prisma.tenant.findUnique({
-      where: { ntnCnic: scenario.sellerNTNCNIC }
+      where: { id: TARGET_TENANT_ID }
     });
     
     if (!tenant) {
-      tenant = await prisma.tenant.create({
-        data: {
-          ntnCnic: scenario.sellerNTNCNIC,
-          businessName: scenario.sellerBusinessName || 'Dummy Tenant',
-          province: scenario.sellerProvince || 'Sindh',
-          address: scenario.sellerAddress || 'Dummy Address'
-        }
-      });
-      tracker.tenantIds.push(tenant.id);
-      console.log(`Created tenant: ${tenant.businessName} (${tenant.ntnCnic})`);
+      console.log('Error: Trade Inn tenant not found!');
+      return;
     }
 
     // 2. Ensure Client exists
@@ -1082,6 +1077,7 @@ async function main() {
       data: {
         tenantId: tenant.id,
         clientId: client?.id || null,
+        creatorId: TARGET_CREATOR_ID,
         invoiceType: scenario.invoiceType || 'Sale Invoice',
         invoiceDate: invoiceDate,
         invoiceRefNo: scenario.invoiceRefNo || scenario.scenarioId,
