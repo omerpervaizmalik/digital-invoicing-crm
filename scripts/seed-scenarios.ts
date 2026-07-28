@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 const tracker = {
   tenantIds: [] as string[],
   clientIds: [] as string[],
-  itemIds: [] as string[]
+  itemIds: [] as string[],
+  invoiceIds: [] as string[]
 };
 
 
@@ -1067,6 +1068,54 @@ async function main() {
         }
       }
     }
+
+    // 4. Create the actual Invoice for the scenario
+    let invoiceDate = new Date();
+    if (scenario.invoiceDate) {
+      invoiceDate = new Date(scenario.invoiceDate);
+      if (isNaN(invoiceDate.getTime())) {
+        invoiceDate = new Date();
+      }
+    }
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        tenantId: tenant.id,
+        clientId: client?.id || null,
+        invoiceType: scenario.invoiceType || 'Sale Invoice',
+        invoiceDate: invoiceDate,
+        invoiceRefNo: scenario.invoiceRefNo || scenario.scenarioId,
+        status: 'DRAFT',
+        items: {
+          create: (scenario.items || []).map(it => {
+             const itemCode = it.hsCode + '-' + (it.productDescription || 'item');
+             return {
+                itemCode: itemCode,
+                hsCode: it.hsCode || '0000.0000',
+                productDescription: it.productDescription || 'test',
+                rate: it.rate || '18%',
+                uoM: it.uoM || 'Numbers, pieces, units',
+                quantity: parseFloat(it.quantity) || 1,
+                totalValues: parseFloat(it.totalValues) || 0,
+                valueSalesExcludingST: parseFloat(it.valueSalesExcludingST) || 0,
+                fixedNotifiedValueOrRetailPrice: parseFloat(it.fixedNotifiedValueOrRetailPrice) || 0,
+                salesTaxApplicable: parseFloat(it.salesTaxApplicable) || 0,
+                salesTaxWithheldAtSource: parseFloat(it.salesTaxWithheldAtSource) || 0,
+                extraTax: parseFloat(it.extraTax) || 0,
+                furtherTax: parseFloat(it.furtherTax) || 0,
+                sroScheduleNo: it.sroScheduleNo || '',
+                fedPayable: parseFloat(it.fedPayable) || 0,
+                discount: parseFloat(it.discount) || 0,
+                saleType: it.saleType || 'Goods at standard rate (default)',
+                sroItemSerialNo: it.sroItemSerialNo || ''
+             }
+          })
+        }
+      }
+    });
+    
+    tracker.invoiceIds.push(invoice.id);
+    console.log(`Created Invoice for Scenario ${scenario.scenarioId} (${invoice.id})`);
   }
   
   // Save tracker to file

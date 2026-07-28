@@ -15,6 +15,14 @@ async function main() {
   console.log('Reading sandbox tracker file...');
   const tracker = JSON.parse(fs.readFileSync(trackerPath, 'utf8'));
 
+  // Delete Invoices
+  if (tracker.invoiceIds && tracker.invoiceIds.length > 0) {
+    console.log(`Deleting ${tracker.invoiceIds.length} invoices...`);
+    await prisma.invoice.deleteMany({
+      where: { id: { in: tracker.invoiceIds } }
+    });
+  }
+
   // Delete Items
   if (tracker.itemIds && tracker.itemIds.length > 0) {
     console.log(`Deleting ${tracker.itemIds.length} items...`);
