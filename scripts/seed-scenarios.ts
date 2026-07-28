@@ -13,6 +13,7 @@ const tracker = {
   stockRegisterIds: [] as number[]
 };
 
+const trackerPath = path.join(__dirname, '.sandbox-seed-tracker.json');
 
 const scenarios = [
   {
@@ -1151,12 +1152,10 @@ async function main() {
     
     tracker.invoiceIds.push(invoice.id);
     console.log(`Created Invoice for Scenario ${scenario.scenarioId} (${invoice.id})`);
+    
+    // Save tracker incrementally to avoid data loss on crash
+    fs.writeFileSync(trackerPath, JSON.stringify(tracker, null, 2));
   }
-  
-  // Save tracker to file
-  const trackerPath = path.join(__dirname, '.sandbox-seed-tracker.json');
-  fs.writeFileSync(trackerPath, JSON.stringify(tracker, null, 2));
-  console.log(`Saved tracker to ${trackerPath}`);
   
   console.log('Finished seeding test data!');
 }
