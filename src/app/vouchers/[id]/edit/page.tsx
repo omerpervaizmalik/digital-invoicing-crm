@@ -23,11 +23,17 @@ export default async function EditVoucherPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  if (invoice.status !== 'DRAFT' && invoice.status !== 'PENDING_APPROVAL' && invoice.invoiceType !== 'Purchase Invoice') {
+  if (
+    invoice.status !== 'DRAFT' && 
+    invoice.status !== 'PENDING_APPROVAL' && 
+    invoice.status !== 'INVALID' &&
+    invoice.status !== 'FAILED_CONNECTION' &&
+    invoice.invoiceType !== 'Purchase Invoice'
+  ) {
     return (
       <div className="min-h-screen bg-neutral-950 text-white font-sans flex items-center justify-center">
         <div className="p-8 text-center bg-neutral-900 border border-neutral-800 rounded-2xl text-rose-500">
-          This voucher has been finalized or sent to FBR and cannot be edited.
+          This voucher has been finalized and sent to FBR and cannot be edited.
         </div>
       </div>
     );
