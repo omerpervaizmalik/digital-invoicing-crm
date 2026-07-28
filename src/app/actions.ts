@@ -449,7 +449,13 @@ export async function updateInvoice(id: string, data: any) {
     throw new Error("Invoice not found or unauthorized");
   }
   
-  if (existingInvoice.status !== 'DRAFT' && existingInvoice.status !== 'PENDING_APPROVAL' && existingInvoice.invoiceType !== 'Purchase Invoice') {
+  if (
+    existingInvoice.status !== 'DRAFT' && 
+    existingInvoice.status !== 'PENDING_APPROVAL' && 
+    existingInvoice.status !== 'INVALID' &&
+    existingInvoice.status !== 'FAILED_CONNECTION' &&
+    existingInvoice.invoiceType !== 'Purchase Invoice'
+  ) {
      throw new Error("Cannot edit a finalized invoice. Please use Credit Note or Debit Note instead.");
   }
 
