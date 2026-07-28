@@ -1,0 +1,60 @@
+{
+  "tenantIds": [],
+  "clientIds": [
+    "cms50a2cg0001v8ecm0u2qgze",
+    "cms50bvor0008v8ectkdi0kve",
+    "cms50ccp6000dv8ecnhx9zntr",
+    "cms50d4do000pv8ecawamxuna",
+    "cms50gj4k001pv8ec2vpgpqp6",
+    "cms50gqhd001uv8ecepp1fkt9",
+    "cms50h5bj001zv8ec48glb11g",
+    "cms50jgzg002wv8ecvda96j9q"
+  ],
+  "itemIds": [
+    "cms50abqj0003v8ecgod13n01",
+    "cms50cf39000fv8ecdv7jskm0",
+    "cms50cq0c000kv8ec2sjtd1zi",
+    "cms50d7qv000rv8eccxipl6yv",
+    "cms50fg3g001bv8ec2ebr0iyz",
+    "cms50hdt20024v8ecj3m1zcai",
+    "cms50i9cm002fv8ecwi1ehect"
+  ],
+  "invoiceIds": [
+    "cms50avsy0005v8ecgvcljtzn",
+    "cms50c8dq000av8ecw5lul7yo",
+    "cms50ciqo000hv8eczq5zkpjq",
+    "cms50cut5000mv8ec4w4lwsbu",
+    "cms50daeb000tv8ecjnfidgrz",
+    "cms50dibd000wv8ecnisobe8i",
+    "cms50duf1000zv8ec8ab05zn3",
+    "cms50e7490012v8eclr2p8r2a",
+    "cms50egkj0015v8ecp7fioduu",
+    "cms50eqfq0018v8ecbogi5wjc",
+    "cms50fq7i001dv8ecluhro3f0",
+    "cms50fwh2001gv8ectdz7prmp",
+    "cms50g4k0001jv8ec95v7nxdm",
+    "cms50gbax001mv8ec3662574o",
+    "cms50glom001rv8ec6frbmx33",
+    "cms50gsnv001wv8ec6sy5d4za",
+    "cms50h83i0021v8ecf0t1f308",
+    "cms50hg8l0026v8eck2e49w3v",
+    "cms50hrdz0029v8ec24fc30w4",
+    "cms50hzml002cv8ecogd3w8pn",
+    "cms50ieoz002hv8ec3tlxh6ja",
+    "cms50ioys002kv8ecz7bq10jj",
+    "cms50ivvr002nv8ec9dk9kt6d",
+    "cms50j65f002qv8eccsk16vbr",
+    "cms50jcwx002tv8ec3s1i1vc9",
+    "cms50jknc002yv8ec1t0lp2oy",
+    "cms50js830031v8ecgq14rtxy"
+  ],
+  "stockRegisterIds": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ]
+}

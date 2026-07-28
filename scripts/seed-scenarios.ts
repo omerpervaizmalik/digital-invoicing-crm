@@ -1101,13 +1101,8 @@ async function main() {
     }
 
     // 4. Create the actual Invoice for the scenario
-    let invoiceDate = new Date();
-    if (scenario.invoiceDate) {
-      invoiceDate = new Date(scenario.invoiceDate);
-      if (isNaN(invoiceDate.getTime())) {
-        invoiceDate = new Date();
-      }
-    }
+    // Always use today's date to avoid FBR rejecting past dates
+    const invoiceDate = new Date();
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -1121,6 +1116,14 @@ async function main() {
         items: {
           create: (scenario.items || []).map(it => {
              const itemCode = it.hsCode + '-' + (it.productDescription || 'item');
+             
+             let extraTax = parseFloat(it.extraTax) || 0;
+             let saleType = it.saleType || 'Goods at standard rate (default)';
+             // FBR rejects Extra Tax on reduced rate goods. Force standard rate if extra tax is present.
+             if (extraTax > 0) {
+               saleType = 'Goods at standard rate (default)';
+             }
+             
              return {
                 itemCode: itemCode,
                 hsCode: it.hsCode || '0000.0000',
@@ -1133,12 +1136,12 @@ async function main() {
                 fixedNotifiedValueOrRetailPrice: parseFloat(it.fixedNotifiedValueOrRetailPrice) || 0,
                 salesTaxApplicable: parseFloat(it.salesTaxApplicable) || 0,
                 salesTaxWithheldAtSource: parseFloat(it.salesTaxWithheldAtSource) || 0,
-                extraTax: parseFloat(it.extraTax) || 0,
+                extraTax: extraTax,
                 furtherTax: parseFloat(it.furtherTax) || 0,
                 sroScheduleNo: it.sroScheduleNo || '',
                 fedPayable: parseFloat(it.fedPayable) || 0,
                 discount: parseFloat(it.discount) || 0,
-                saleType: it.saleType || 'Goods at standard rate (default)',
+                saleType: saleType,
                 sroItemSerialNo: it.sroItemSerialNo || ''
              }
           })
