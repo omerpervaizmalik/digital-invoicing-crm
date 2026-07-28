@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:sandbox": "npx tsx scripts/seed-scenarios.ts",
+    "teardown:sandbox": "npx tsx scripts/teardown-scenarios.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

@@ -1,6 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
+
+// Tracker object to keep IDs of seeded data
+const tracker = {
+  tenantIds: [] as string[],
+  clientIds: [] as string[],
+  itemIds: [] as string[]
+};
+
 
 const scenarios = [
   {
@@ -993,6 +1003,7 @@ async function main() {
           address: scenario.sellerAddress || 'Dummy Address'
         }
       });
+      tracker.tenantIds.push(tenant.id);
       console.log(`Created tenant: ${tenant.businessName} (${tenant.ntnCnic})`);
     }
 
@@ -1017,6 +1028,7 @@ async function main() {
           buyerRegistrationType: scenario.buyerRegistrationType || 'Unregistered'
         }
       });
+      tracker.clientIds.push(client.id);
       console.log(`Created client: ${client.buyerBusinessName} for Tenant ${tenant.ntnCnic}`);
     }
 
@@ -1035,7 +1047,7 @@ async function main() {
         });
 
         if (!existingItem) {
-          await prisma.item.create({
+          const item = await prisma.item.create({
             data: {
               tenantId: tenant.id,
               itemCode: itemCode,
@@ -1050,11 +1062,18 @@ async function main() {
               sroItemSerialNo: it.sroItemSerialNo || ''
             }
           });
+          tracker.itemIds.push(item.id);
           console.log(`Created item: ${it.hsCode} - ${it.productDescription} for Tenant ${tenant.ntnCnic}`);
         }
       }
     }
   }
+  
+  // Save tracker to file
+  const trackerPath = path.join(__dirname, '.sandbox-seed-tracker.json');
+  fs.writeFileSync(trackerPath, JSON.stringify(tracker, null, 2));
+  console.log(`Saved tracker to ${trackerPath}`);
+  
   console.log('Finished seeding test data!');
 }
 
