@@ -9,7 +9,8 @@ const tracker = {
   tenantIds: [] as string[],
   clientIds: [] as string[],
   itemIds: [] as string[],
-  invoiceIds: [] as string[]
+  invoiceIds: [] as string[],
+  stockRegisterIds: [] as number[]
 };
 
 
@@ -1060,6 +1061,41 @@ async function main() {
           });
           tracker.itemIds.push(item.id);
           console.log(`Created item: ${it.hsCode} - ${it.productDescription} for Tenant ${tenant.ntnCnic}`);
+
+          // Also create dummy stock for this item so it doesn't fail validation
+          const d = new Date();
+          const monthYear = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          
+          let rateValue = parseFloat(it.rate) || 18;
+          if (isNaN(rateValue)) rateValue = 18;
+
+          const stock = await prisma.stockRegister.upsert({
+            where: {
+              tenantId_itemCode_monthYear: {
+                tenantId: tenant.id,
+                itemCode: itemCode,
+                monthYear: monthYear
+              }
+            },
+            update: {
+              purchasedQty: { increment: 100000 },
+              purchasedVal: { increment: 10000000 }
+            },
+            create: {
+              tenantId: tenant.id,
+              itemCode: itemCode,
+              hsCode: it.hsCode || '0000.0000',
+              uoM: it.uoM || 'Numbers, pieces, units',
+              salesTaxRate: rateValue,
+              monthYear: monthYear,
+              openingQty: 100000,
+              openingVal: 10000000,
+              purchasedQty: 0,
+              purchasedVal: 0
+            }
+          });
+          tracker.stockRegisterIds.push(stock.id);
+          console.log(`Added 100,000 dummy stock for item ${itemCode}`);
         }
       }
     }

@@ -31,6 +31,14 @@ async function main() {
     });
   }
 
+  // Delete Stock Registers
+  if (tracker.stockRegisterIds && tracker.stockRegisterIds.length > 0) {
+    console.log(`Deleting ${tracker.stockRegisterIds.length} stock registers...`);
+    await prisma.stockRegister.deleteMany({
+      where: { id: { in: tracker.stockRegisterIds } }
+    });
+  }
+
   // Delete Clients
   if (tracker.clientIds && tracker.clientIds.length > 0) {
     console.log(`Deleting ${tracker.clientIds.length} clients...`);
