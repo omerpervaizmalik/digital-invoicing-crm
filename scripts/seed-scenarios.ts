@@ -1092,7 +1092,9 @@ async function main() {
               openingQty: 100000,
               openingVal: 10000000,
               purchasedQty: 0,
-              purchasedVal: 0
+              purchasedVal: 10000000,
+              closingQty: 100000,
+              closingVal: 10000000
             }
           });
           tracker.stockRegisterIds.push(stock.id);
