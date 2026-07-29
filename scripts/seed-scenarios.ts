@@ -1120,7 +1120,7 @@ async function main() {
           create: (scenario.items || []).map(it => {
              const itemCode = it.hsCode + '-' + (it.productDescription || 'item');
              
-             let extraTax = parseFloat(it.extraTax) || 0;
+             let extraTax = parseFloat(String(it.extraTax)) || 0;
              let saleType = it.saleType || 'Goods at standard rate (default)';
              // FBR rejects Extra Tax on reduced rate goods. Force standard rate if extra tax is present.
              if (extraTax > 0) {
