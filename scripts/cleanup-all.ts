@@ -37,7 +37,7 @@ async function main() {
   await prisma.client.deleteMany({
     where: {
       tenantId: TARGET_TENANT_ID,
-      businessName: 'FERTILIZER MANUFAC IRS NEW'
+      buyerBusinessName: 'FERTILIZER MANUFAC IRS NEW'
     }
   });
   console.log('Deleted dummy clients.');
