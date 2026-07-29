@@ -9,8 +9,8 @@ export interface FbrItem {
   fixedNotifiedValueOrRetailPrice: number;
   salesTaxApplicable: number;
   salesTaxWithheldAtSource: number;
-  extraTax: number;
-  furtherTax: number;
+  extraTax?: number;
+  furtherTax?: number;
   sroScheduleNo: string;
   fedPayable: number;
   discount: number;
