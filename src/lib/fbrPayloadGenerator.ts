@@ -15,44 +15,32 @@ export function generateFbrPayload(invoice: FullInvoice, isSandbox: boolean = fa
     return Number(parsed.toFixed(dec));
   };
 
-  const fbrItems: FbrItem[] = invoice.items.map(item => {
-    const fbrItem: FbrItem = {
-      hsCode: item.hsCode,
-      productDescription: item.productDescription,
-      rate: (() => {
-        if (!item.rate) return "0%";
-        let strRate = String(item.rate);
-        if (strRate.includes("%")) return strRate;
-        let numRate = Number(strRate);
-        if (numRate < 1) numRate = numRate * 100; // convert 0.18 to 18
-        return `${numRate}%`;
-      })(),
-      uoM: item.uoM,
-      quantity: f(item.quantity, 4),
-      totalValues: f(item.totalValues, 2),
-      valueSalesExcludingST: f(item.valueSalesExcludingST, 2),
-      fixedNotifiedValueOrRetailPrice: f(item.fixedNotifiedValueOrRetailPrice, 2),
-      salesTaxApplicable: f(item.salesTaxApplicable, 2),
-      salesTaxWithheldAtSource: f(item.salesTaxWithheldAtSource, 2),
-      sroScheduleNo: item.sroScheduleNo || "",
-      fedPayable: f(item.fedPayable, 2),
-      discount: f(item.discount, 2),
-      saleType: item.saleType,
-      sroItemSerialNo: item.sroItemSerialNo || "",
-    };
-
-    const parsedExtraTax = f(item.extraTax, 2);
-    if (parsedExtraTax > 0) {
-      fbrItem.extraTax = parsedExtraTax;
-    }
-
-    const parsedFurtherTax = f(item.furtherTax, 2);
-    if (parsedFurtherTax > 0) {
-      fbrItem.furtherTax = parsedFurtherTax;
-    }
-
-    return fbrItem;
-  });
+  const fbrItems: FbrItem[] = invoice.items.map(item => ({
+    hsCode: item.hsCode,
+    productDescription: item.productDescription,
+    rate: (() => {
+      if (!item.rate) return "0%";
+      let strRate = String(item.rate);
+      if (strRate.includes("%")) return strRate;
+      let numRate = Number(strRate);
+      if (numRate < 1) numRate = numRate * 100; // convert 0.18 to 18
+      return `${numRate}%`;
+    })(),
+    uoM: item.uoM,
+    quantity: f(item.quantity, 4),
+    totalValues: f(item.totalValues, 2),
+    valueSalesExcludingST: f(item.valueSalesExcludingST, 2),
+    fixedNotifiedValueOrRetailPrice: f(item.fixedNotifiedValueOrRetailPrice, 2),
+    salesTaxApplicable: f(item.salesTaxApplicable, 2),
+    salesTaxWithheldAtSource: f(item.salesTaxWithheldAtSource, 2),
+    extraTax: f(item.extraTax, 2),
+    furtherTax: f(item.furtherTax, 2),
+    sroScheduleNo: item.sroScheduleNo || "",
+    fedPayable: f(item.fedPayable, 2),
+    discount: f(item.discount, 2),
+    saleType: item.saleType,
+    sroItemSerialNo: item.sroItemSerialNo || "",
+  }));
 
   const cleanId = (id: string | null | undefined) => id ? id.replace(/[\s-]/g, '') : "";
 
